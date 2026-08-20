@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = Auth::attempt($email, $password);
 
     if ($result['ok']) {
+        $_SESSION['show_login_loading_screen'] = true;
         redirect(Auth::dashboardPathForRole((string) Auth::role()));
     }
 

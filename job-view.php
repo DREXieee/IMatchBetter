@@ -89,7 +89,7 @@ require __DIR__ . '/includes/header.php';
                 <input type="hidden" name="job_id" value="<?= (int) $job['id'] ?>">
                 <input type="hidden" name="action" value="<?= $isJobSaved ? 'unsave' : 'save' ?>">
                 <input type="hidden" name="redirect" value="<?= h($_SERVER['REQUEST_URI'] ?? '') ?>">
-                <button type="submit" class="btn btn-outline"><?= $isJobSaved ? '★ Saved' : '☆ Save for later' ?></button>
+                <button type="submit" class="btn btn-outline" aria-pressed="<?= $isJobSaved ? 'true' : 'false' ?>"><?= $isJobSaved ? '★ Saved' : '☆ Save for later' ?></button>
             </form>
         <?php endif; ?>
 

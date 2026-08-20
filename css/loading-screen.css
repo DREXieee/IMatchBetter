@@ -1,0 +1,158 @@
+/* ==========================================================================
+   "Perfect Match Neural Pulse" preloader.
+   Site-wide fullscreen overlay — see includes/partials/loading-screen.php and
+   js/loading-screen.js. GPU-friendly: only transform/opacity/filter are animated.
+   ========================================================================== */
+
+body.is-loading {
+    overflow: hidden;
+}
+
+.loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    background: #0a0d14;
+    color: #f1f5f9;
+    font-family: var(--font-sans, system-ui, sans-serif);
+    transition: opacity 0.7s ease, filter 0.7s ease, transform 0.7s ease;
+}
+
+.loading-screen.is-hiding {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(1.05);
+    pointer-events: none;
+}
+
+.loading-particles {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.55;
+}
+
+/* -------------------------------------------------------------------------
+   Core: aura + orbital ring + tracing glyph + logo, all stacked in one cell
+   ------------------------------------------------------------------------- */
+.loading-core {
+    position: relative;
+    z-index: 1;
+    width: clamp(160px, 24vw, 220px);
+    height: clamp(160px, 24vw, 220px);
+    display: grid;
+    place-items: center;
+}
+.loading-core > * {
+    grid-area: 1 / 1;
+}
+
+.loading-aura {
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.55) 0%, rgba(34, 211, 238, 0.25) 45%, transparent 75%);
+    filter: blur(28px);
+    animation: loadingAuraPulse 3.2s ease-in-out infinite;
+}
+@keyframes loadingAuraPulse {
+    0%, 100% { transform: scale(0.85); opacity: 0.6; }
+    50% { transform: scale(1.15); opacity: 0.95; }
+}
+
+.loading-ring {
+    width: 100%;
+    height: 100%;
+    animation: loadingRingSpin 3s linear infinite;
+    transform-origin: 50% 50%;
+}
+.loading-ring-track {
+    fill: none;
+    stroke: rgba(148, 163, 184, 0.18);
+    stroke-width: 1.5;
+}
+.loading-ring-sweep {
+    fill: none;
+    stroke: #22d3ee;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 90 488;
+    filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.85));
+}
+@keyframes loadingRingSpin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-glyph {
+    width: 62%;
+    height: 62%;
+}
+.loading-glyph-path {
+    fill: none;
+    stroke: url(#loading-glyph-gradient);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.6));
+    animation: loadingGlyphDraw 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.loading-glyph-path:nth-child(2) { animation-delay: 0.15s; }
+.loading-glyph-path:nth-child(3) { animation-delay: 0.3s; }
+@keyframes loadingGlyphDraw {
+    to { stroke-dashoffset: 0; }
+}
+
+.loading-logo {
+    width: 34%;
+    height: 34%;
+    object-fit: contain;
+    animation: loadingLogoPulse 2.4s ease-in-out infinite;
+}
+@keyframes loadingLogoPulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.55)); }
+    50% { transform: scale(1.06); filter: drop-shadow(0 0 24px rgba(34, 211, 238, 0.7)); }
+}
+
+/* -------------------------------------------------------------------------
+   Progress + status
+   ------------------------------------------------------------------------- */
+.loading-percent {
+    position: relative;
+    z-index: 1;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    background: linear-gradient(120deg, #60a5fa, #22d3ee);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-variant-numeric: tabular-nums;
+}
+
+.loading-status {
+    position: relative;
+    z-index: 1;
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+    color: #94a3b8;
+    min-height: 1.2em;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .loading-status { padding: 0 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loading-aura, .loading-ring, .loading-logo, .loading-glyph-path {
+        animation: none !important;
+    }
+    .loading-glyph-path { stroke-dashoffset: 0; }
+}

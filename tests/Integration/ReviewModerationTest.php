@@ -43,6 +43,26 @@ final class ReviewModerationTest extends DatabaseTestCase
         $this->assertSame($approvedId, (int) $publicList[0]['id']);
     }
 
+    public function testLatestApprovedOnlyReturnsApprovedReviewsMostRecentFirst(): void
+    {
+        $employer = $this->makeUser('employer');
+        $this->makeEmployerProfile($employer, 'Acme Robotics');
+        $applicantA = $this->makeUser('applicant');
+        $applicantB = $this->makeUser('applicant');
+        $admin = $this->makeUser('admin');
+
+        $pendingId = EmployerReview::create($employer, $applicantA, null, 3, 'Pending review', 'Not moderated yet.');
+        $approvedId = EmployerReview::create($employer, $applicantB, null, 5, 'Great communication', 'Fast responses.');
+        EmployerReview::moderate($approvedId, 'approved', $admin);
+
+        $latest = EmployerReview::latestApproved(5);
+
+        $this->assertCount(1, $latest);
+        $this->assertSame($approvedId, (int) $latest[0]['id']);
+        $this->assertNotContains($pendingId, array_column($latest, 'id'));
+        $this->assertSame('Acme Robotics', $latest[0]['company_name']);
+    }
+
     public function testApplicantReviewModerationMirrorsEmployerReview(): void
     {
         $employer = $this->makeUser('employer');

@@ -4,8 +4,11 @@ require __DIR__ . '/includes/bootstrap.php';
 
 use IMatchBetter\Auth\Auth;
 use IMatchBetter\Config\Database;
+use IMatchBetter\Models\EmployerReview;
 use IMatchBetter\Models\SavedJob;
+use IMatchBetter\Models\Skill;
 use IMatchBetter\Services\JobSearchService;
+use IMatchBetter\Services\SkillMatchService;
 
 $featuredJobs = JobSearchService::featured(6);
 $savedJobIds = (Auth::check() && Auth::role() === 'applicant') ? SavedJob::savedJobIdSet((int) Auth::id()) : [];
@@ -16,7 +19,27 @@ $companiesCount = (int) $pdo->query("SELECT COUNT(*) FROM employer_profiles WHER
 $applicantsCount = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'applicant' AND is_active = 1")->fetchColumn();
 $hiresCount = (int) $pdo->query("SELECT COUNT(*) FROM applications WHERE status = 'hired'")->fetchColumn();
 
+// Hero visual: spotlight a real open job instead of a mocked-up example.
+$spotlightJob = $featuredJobs[0] ?? null;
+$spotlightSkills = [];
+$spotlightMatches = 0;
+$spotlightInitials = '';
+if ($spotlightJob) {
+    $tags = Skill::namesForJob((int) $spotlightJob['id']);
+    $spotlightSkills = array_slice($tags['required'] ?: $tags['preferred'], 0, 3);
+    $spotlightMatches = count(SkillMatchService::applicantsAboveThreshold((int) $spotlightJob['id'], 50.0));
+
+    $companyWords = preg_split('/\s+/', trim($spotlightJob['company_name'])) ?: [];
+    $spotlightInitials = strtoupper(mb_substr($companyWords[0] ?? '', 0, 1) . mb_substr($companyWords[1] ?? '', 0, 1));
+}
+
+$testimonials = EmployerReview::latestApproved(1);
+$testimonial = $testimonials[0] ?? null;
+
+$employmentLabels = ['full_time' => 'Full-time', 'part_time' => 'Part-time', 'contract' => 'Contract', 'internship' => 'Internship', 'remote' => 'Remote'];
+
 $pageTitle = 'IMatchBetter — Find Your Next Role';
+$metaDescription = "IMatchBetter connects job seekers with employers who've been reviewed and approved by our team — no fake listings, no noise.";
 $bodyClass = 'landing-page';
 $extraStylesheets = ['css/landing.css'];
 $extraScripts = ['js/scroll-animate.js'];
@@ -31,7 +54,7 @@ require __DIR__ . '/includes/header.php';
     <div class="container hero-grid">
         <div data-animate="fade-up">
             <span class="eyebrow-pill">Reviewed employers. Real listings.</span>
-            <h1>Find work you're <span class="text-gradient">proud of</span>. Hire people who <span class="text-gradient">fit</span>.</h1>
+            <h1>Find work you're <span class="text-gradient">proud&nbsp;of</span>. Hire people who <span class="text-gradient">fit</span>.</h1>
             <p class="lead">IMatchBetter connects job seekers with employers who've been reviewed and approved by our team — no fake listings, no noise.</p>
 
             <form method="get" action="<?= h(base_url('jobs.php')) ?>" class="hero-search">
@@ -53,33 +76,58 @@ require __DIR__ . '/includes/header.php';
 
         <div class="hero-visual" data-animate="fade-up">
             <div class="hero-visual-panel">
-                <div class="hero-visual-panel-row">
-                    <span class="hero-visual-avatar">JP</span>
-                    <div>
-                        <strong>Junior Web Developer</strong>
-                        <span>Manila, Philippines · Full-time</span>
+                <?php if ($spotlightJob): ?>
+                    <div class="hero-visual-panel-row">
+                        <span class="hero-visual-avatar"><?= h($spotlightInitials) ?></span>
+                        <div>
+                            <strong><?= h($spotlightJob['title']) ?></strong>
+                            <span>
+                                <?= h($spotlightJob['company_name']) ?>
+                                <?php if (!empty($spotlightJob['location'])): ?> · <?= h($spotlightJob['location']) ?><?php endif; ?>
+                                · <?= h($employmentLabels[$spotlightJob['employment_type']] ?? $spotlightJob['employment_type']) ?>
+                            </span>
+                        </div>
                     </div>
-                </div>
-                <div class="hero-visual-panel-row">
-                    <span class="hero-visual-avatar hero-visual-avatar-alt">AR</span>
-                    <div>
-                        <strong>Acme Robotics</strong>
-                        <span>Verified employer</span>
+                    <div class="hero-visual-panel-row">
+                        <span class="hero-visual-avatar hero-visual-avatar-alt">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        </span>
+                        <div>
+                            <strong><?= $applicantsCount ?> job seeker<?= $applicantsCount === 1 ? '' : 's' ?></strong>
+                            <span>Actively looking for their next role</span>
+                        </div>
                     </div>
-                </div>
-                <div class="hero-visual-skills">
-                    <span class="hero-visual-tag">HTML</span>
-                    <span class="hero-visual-tag">CSS</span>
-                    <span class="hero-visual-tag">JavaScript</span>
-                </div>
+                    <?php if (!empty($spotlightSkills)): ?>
+                        <div class="hero-visual-skills">
+                            <?php foreach ($spotlightSkills as $skillName): ?>
+                                <span class="hero-visual-tag"><?= h($skillName) ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <div class="hero-visual-panel-row">
+                        <div>
+                            <strong>New jobs posted weekly</strong>
+                            <span>Every listing is reviewed before it goes live.</span>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="hero-visual-badge">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-                <div>
-                    <strong>98%</strong>
-                    <span>Match Found</span>
-                </div>
+                <?php if ($spotlightJob && $spotlightMatches > 0): ?>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    <div>
+                        <strong><?= $spotlightMatches ?></strong>
+                        <span>Strong <?= $spotlightMatches === 1 ? 'match' : 'matches' ?></span>
+                    </div>
+                <?php else: ?>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    <div>
+                        <strong>Reviewed</strong>
+                        <span>Employers, verified</span>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -116,6 +164,21 @@ require __DIR__ . '/includes/header.php';
     </div>
 </section>
 
+<?php if ($testimonial): ?>
+<section class="testimonial">
+    <div class="container">
+        <div class="testimonial-card" data-animate="fade-up">
+            <div class="star-rating" aria-hidden="true"><?= str_repeat('★', (int) $testimonial['rating']) . str_repeat('☆', 5 - (int) $testimonial['rating']) ?></div>
+            <blockquote>
+                <?php if (!empty($testimonial['title'])): ?><p class="testimonial-title"><?= h($testimonial['title']) ?></p><?php endif; ?>
+                <p class="testimonial-body">&ldquo;<?= h($testimonial['body']) ?>&rdquo;</p>
+            </blockquote>
+            <cite><?= h($testimonial['applicant_name']) ?> <span>— interviewed at <?= h($testimonial['company_name']) ?></span></cite>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
 <section class="featured-jobs">
     <div class="container">
         <div class="section-header" data-animate="fade-up">
@@ -139,19 +202,19 @@ require __DIR__ . '/includes/header.php';
     <div class="container">
         <div class="stats-pill" data-animate="fade-up">
             <div class="stat-block">
-                <div class="stat-number"><?= $openJobsCount ?></div>
+                <div class="stat-number" data-count-to="<?= $openJobsCount ?>"><?= $openJobsCount ?></div>
                 <div class="stat-caption">Open Jobs</div>
             </div>
             <div class="stat-block">
-                <div class="stat-number"><?= $companiesCount ?></div>
+                <div class="stat-number" data-count-to="<?= $companiesCount ?>"><?= $companiesCount ?></div>
                 <div class="stat-caption">Approved Companies</div>
             </div>
             <div class="stat-block">
-                <div class="stat-number"><?= $applicantsCount ?></div>
+                <div class="stat-number" data-count-to="<?= $applicantsCount ?>"><?= $applicantsCount ?></div>
                 <div class="stat-caption">Job Seekers</div>
             </div>
             <div class="stat-block">
-                <div class="stat-number"><?= $hiresCount ?></div>
+                <div class="stat-number" data-count-to="<?= $hiresCount ?>"><?= $hiresCount ?></div>
                 <div class="stat-caption">Successful Hires</div>
             </div>
         </div>

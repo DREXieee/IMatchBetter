@@ -3,6 +3,7 @@
 namespace IMatchBetter\Models;
 
 use IMatchBetter\Config\Database;
+use PDO;
 
 /**
  * A review of an employer, written by an applicant.
@@ -96,6 +97,27 @@ class EmployerReview
         $stmt->execute([$applicantId, $employerId]);
 
         return (bool) $stmt->fetchColumn();
+    }
+
+    /**
+     * Most recent approved reviews across all employers, for showcasing real testimonials
+     * (e.g. on the landing page) rather than fabricated quotes.
+     */
+    public static function latestApproved(int $limit = 1): array
+    {
+        $stmt = Database::connection()->prepare(
+            "SELECT er.*, u.full_name AS applicant_name, ep.company_name
+             FROM employer_reviews er
+             JOIN users u ON u.id = er.applicant_id
+             JOIN employer_profiles ep ON ep.user_id = er.employer_id
+             WHERE er.status = 'approved'
+             ORDER BY er.created_at DESC
+             LIMIT ?"
+        );
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
     }
 
     public static function countRecentByAuthor(int $applicantId, int $hours = 24): int

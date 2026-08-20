@@ -29,8 +29,13 @@ rather than free-text keyword guessing.
    cp .env.example .env
    ```
    Edit `.env` with your database credentials and (optionally) SMTP settings for outgoing mail
-   (verification emails, notifications, password resets). `APP_URL` should match wherever you're
-   serving the app from.
+   (verification emails, notifications, password resets). `APP_URL`'s path segment (e.g.
+   `/imatchbetter`) must match where the app is actually deployed — but its scheme and host are
+   only a fallback: `base_url()` (`src/Helpers/functions.php`) prefers the current request's own
+   host when one exists, so the same install serves correct links whether it's reached via
+   `localhost`, `127.0.0.1`, or another device's LAN IP (e.g. testing on a phone on the same
+   Wi-Fi), with no per-device config changes. The configured scheme/host is only used for
+   CLI-run scripts that have no request to read from (e.g. `scripts/process-job-match-queue.php`).
 
 4. **Create the database and load the schema:**
    ```

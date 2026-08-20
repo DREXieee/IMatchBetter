@@ -19,7 +19,7 @@ $isJobSaved = !empty($savedJobIds[(int) $job['id']]);
             <input type="hidden" name="job_id" value="<?= (int) $job['id'] ?>">
             <input type="hidden" name="action" value="<?= $isJobSaved ? 'unsave' : 'save' ?>">
             <input type="hidden" name="redirect" value="<?= h($_SERVER['REQUEST_URI'] ?? '') ?>">
-            <button type="submit" class="job-card-save-btn" title="<?= $isJobSaved ? 'Remove from saved jobs' : 'Save this job' ?>">
+            <button type="submit" class="job-card-save-btn" aria-pressed="<?= $isJobSaved ? 'true' : 'false' ?>" title="<?= $isJobSaved ? 'Remove from saved jobs' : 'Save this job' ?>">
                 <?= $isJobSaved ? '★ Saved' : '☆ Save' ?>
             </button>
         </form>

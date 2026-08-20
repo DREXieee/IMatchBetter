@@ -17,11 +17,17 @@
 }
 
 .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     font-weight: 800;
     font-size: 1.25rem;
     color: var(--color-text);
 }
 .brand span { color: var(--color-primary); }
+.brand-logo {
+    border-radius: 6px;
+}
 
 .nav-toggle {
     display: none;

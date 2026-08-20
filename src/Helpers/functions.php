@@ -8,10 +8,33 @@ if (!function_exists('h')) {
 }
 
 if (!function_exists('base_url')) {
+    /**
+     * Builds an absolute URL under the app's base path. The subdirectory portion (e.g.
+     * "/imatchbetter") always comes from APP_URL, since that reflects where the app is
+     * actually deployed — but the scheme+host are taken from the current request when one
+     * exists, so links work correctly whether the app is reached via localhost, 127.0.0.1,
+     * a LAN IP, or (eventually) a real domain, without needing APP_URL edited per device.
+     * Falls back entirely to APP_URL outside a request context (CLI scripts, cron, tests).
+     */
     function base_url(string $path = ''): string
     {
-        $base = rtrim($_ENV['APP_URL'] ?? '', '/');
-        return $base . '/' . ltrim($path, '/');
+        static $appBasePath = null;
+
+        if ($appBasePath === null) {
+            $configured = parse_url($_ENV['APP_URL'] ?? '');
+            $appBasePath = rtrim($configured['path'] ?? '', '/');
+        }
+
+        if (!empty($_SERVER['HTTP_HOST'])) {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $origin = $scheme . '://' . $_SERVER['HTTP_HOST'];
+        } else {
+            $configured = parse_url($_ENV['APP_URL'] ?? '');
+            $origin = ($configured['scheme'] ?? 'http') . '://' . ($configured['host'] ?? 'localhost')
+                . (isset($configured['port']) ? ':' . $configured['port'] : '');
+        }
+
+        return $origin . $appBasePath . '/' . ltrim($path, '/');
     }
 }
 

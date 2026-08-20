@@ -27,6 +27,32 @@ body.landing-page {
 body.landing-page a { color: var(--lp-primary-light); }
 
 /* -------------------------------------------------------------------------
+   Focus indicators — custom rings instead of the default outline, visible
+   only for keyboard navigation (:focus-visible), on every interactive
+   element: links, buttons, and the hero search inputs.
+   ------------------------------------------------------------------------- */
+body.landing-page a:focus-visible,
+body.landing-page button:focus-visible,
+body.landing-page .btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.55), 0 0 0 6px rgba(96, 165, 250, 0.18);
+    border-radius: var(--radius-sm);
+}
+
+body.landing-page .hero-search-field input:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+body.landing-page .hero-search:focus-within {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35), 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+body.landing-page .job-card:focus-visible {
+    border-radius: var(--radius-md);
+}
+
+/* -------------------------------------------------------------------------
    Header — floating glass nav
    ------------------------------------------------------------------------- */
 body.landing-page .site-header {
@@ -128,9 +154,9 @@ body.landing-page .grid .will-animate:nth-child(6) { transition-delay: 0.4s; }
 }
 
 .hero-mesh {
-    position: absolute;
-    inset: -20% -10%;
-    z-index: 0;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
     pointer-events: none;
 }
 .mesh-blob {
@@ -192,6 +218,7 @@ body.landing-page .grid .will-animate:nth-child(6) { transition-delay: 0.4s; }
 .hero h1 {
     margin-bottom: var(--space-3);
     color: var(--lp-text);
+    text-wrap: balance;
 }
 
 .text-gradient {
@@ -428,6 +455,49 @@ body.landing-page .grid .will-animate:nth-child(6) { transition-delay: 0.4s; }
     justify-content: center;
     margin: 0 auto var(--space-3);
     box-shadow: 0 0 30px rgba(59, 130, 246, 0.25);
+}
+
+/* -------------------------------------------------------------------------
+   Testimonial
+   ------------------------------------------------------------------------- */
+.testimonial { padding: 0 0 var(--space-6); }
+
+.testimonial-card {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+    background: var(--lp-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--lp-border-soft);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+}
+.testimonial-card .star-rating {
+    font-size: 1.1rem;
+    margin-bottom: var(--space-3);
+}
+.testimonial-card blockquote {
+    margin: 0 0 var(--space-3);
+}
+.testimonial-title {
+    font-weight: 700;
+    color: var(--lp-text);
+    margin: 0 0 var(--space-2);
+}
+.testimonial-body {
+    font-size: 1.15rem;
+    color: var(--lp-text);
+    margin: 0;
+    text-wrap: balance;
+}
+.testimonial-card cite {
+    font-style: normal;
+    color: var(--lp-text-muted);
+    font-weight: 600;
+}
+.testimonial-card cite span {
+    font-weight: 400;
 }
 
 /* -------------------------------------------------------------------------
