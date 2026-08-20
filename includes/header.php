@@ -19,7 +19,7 @@ $unreadNotifications = Auth::check() ? Notification::unreadCount((int) Auth::id(
     <link rel="stylesheet" href="<?= h(base_url($sheet)) ?>">
     <?php endforeach; endif; ?>
 </head>
-<body>
+<body<?= !empty($bodyClass) ? ' class="' . h($bodyClass) . '"' : '' ?>>
 <header class="site-header">
     <div class="container">
         <a href="<?= h(base_url('index.php')) ?>" class="brand">IMatch<span>Better</span></a>

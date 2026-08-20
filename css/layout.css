@@ -98,6 +98,23 @@
     align-items: center;
 }
 
+.footer-links {
+    display: flex;
+    gap: var(--space-4);
+}
+.footer-links a {
+    color: var(--color-text-muted);
+}
+.footer-links a:hover {
+    color: var(--color-primary);
+}
+
+.footer-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
 /* Dashboard shell */
 .dashboard-shell {
     display: flex;
