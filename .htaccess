@@ -1,0 +1,6 @@
+ErrorDocument 404 /imatchbetter/404.php
+ErrorDocument 500 /imatchbetter/500.php
+
+<FilesMatch "\.(env|sql|log)$">
+    Require all denied
+</FilesMatch>

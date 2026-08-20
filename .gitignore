@@ -1,0 +1,10 @@
+/vendor/
+/uploads/resumes/*
+!/uploads/resumes/.gitkeep
+/uploads/logos/*
+!/uploads/logos/.gitkeep
+/uploads/certificates/*
+!/uploads/certificates/.gitkeep
+.env
+/logs/*.log
+/.phpunit.cache/
