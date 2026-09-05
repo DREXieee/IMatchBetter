@@ -1,0 +1,112 @@
+/* ==========================================================================
+   Two-pane messaging inbox. Loaded only on the applicant/employer messages
+   pages via $extraStylesheets.
+   ========================================================================== */
+
+.messages-shell {
+    display: flex;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    min-height: 560px;
+}
+
+.messages-list {
+    width: 300px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--color-border);
+    overflow-y: auto;
+}
+.messages-list-header {
+    padding: var(--space-3) var(--space-4);
+    font-weight: 700;
+    color: var(--color-primary);
+    border-bottom: 1px solid var(--color-border);
+}
+.messages-list-item {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid var(--color-border);
+}
+.messages-list-item:hover { background: var(--color-bg-alt); text-decoration: none; }
+.messages-list-item.is-active { background: var(--color-bg-alt); }
+.messages-list-item-name { font-weight: 700; margin: 0 0 0.15rem; display: flex; align-items: center; gap: 0.4rem; }
+.messages-list-item-preview {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.messages-list-item-unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.messages-thread {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.messages-thread-header {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    font-weight: 700;
+}
+.messages-thread-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.messages-thread-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-alt);
+    color: var(--color-text);
+    align-self: flex-start;
+}
+.message-bubble.is-mine {
+    background: var(--color-primary);
+    color: #fff;
+    align-self: flex-end;
+}
+.message-bubble-time {
+    display: block;
+    font-size: 0.7rem;
+    opacity: 0.65;
+    margin-top: 0.25rem;
+}
+
+.messages-thread-form {
+    display: flex;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--color-border);
+}
+.messages-thread-form .form-control { flex: 1; }
+
+@media (max-width: 767px) {
+    .messages-shell { flex-direction: column; min-height: 0; }
+    .messages-list { width: 100%; max-height: 220px; border-right: none; border-bottom: 1px solid var(--color-border); }
+}

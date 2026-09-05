@@ -2,6 +2,7 @@
 
 require __DIR__ . '/../includes/bootstrap.php';
 
+use IMatchBetter\Auth\Csrf;
 use IMatchBetter\Auth\Guard;
 use IMatchBetter\Models\ApplicantProfile;
 
@@ -68,23 +69,35 @@ require __DIR__ . '/../includes/header.php';
             <div class="card empty-state"><?= $hasSearched ? 'No matching profiles found.' : 'Use the filters above to search the talent database.' ?></div>
         <?php else: ?>
             <p class="form-hint"><?= $results['total'] ?> profile<?= $results['total'] === 1 ? '' : 's' ?> found.</p>
-            <div class="table-wrap">
-                <table class="data-table">
-                    <thead><tr><th>Name</th><th>Headline</th><th>School</th><th>Degree</th><th>Grad. Year</th><th>Skills</th><th>Location</th></tr></thead>
-                    <tbody>
-                    <?php foreach ($results['graduates'] as $r): ?>
-                        <tr>
-                            <td><?= h($r['full_name']) ?></td>
-                            <td><?= h($r['headline'] ?? '') ?></td>
-                            <td><?= h($r['school'] ?? '') ?></td>
-                            <td><?= h($r['degree'] ?? '') ?></td>
-                            <td><?= h((string) ($r['graduation_year'] ?? '')) ?></td>
-                            <td><?= h($r['skills'] ?? '') ?></td>
-                            <td><?= h($r['location'] ?? '') ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
+
+            <div class="grid grid-3">
+                <?php foreach ($results['graduates'] as $r): ?>
+                    <div class="card person-card" style="align-items:stretch; text-align:left;">
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <div class="avatar"></div>
+                            <div>
+                                <p class="person-card-name" style="margin:0;"><?= h($r['full_name']) ?></p>
+                                <p class="person-card-subtitle" style="margin:0;"><?= h($r['headline'] ?? '') ?> <?= !empty($r['headline']) && !empty($r['school']) ? '·' : '' ?> <?= h($r['school'] ?? '') ?></p>
+                            </div>
+                        </div>
+                        <?php if (!empty($r['skills'])): ?>
+                            <div class="chip-static-list" style="margin-top:0.5rem;">
+                                <?php foreach (array_slice(\IMatchBetter\Models\Skill::parseList($r['skills']), 0, 4) as $skillName): ?>
+                                    <span class="chip-static"><?= h($skillName) ?></span>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                        <p class="form-hint" style="margin:0.5rem 0 0;">
+                            <?= h($r['degree'] ?? '') ?><?= !empty($r['degree']) && !empty($r['graduation_year']) ? ' · ' : '' ?><?= !empty($r['graduation_year']) ? 'Graduated ' . h((string) $r['graduation_year']) : '' ?>
+                            <?php if (!empty($r['location'])): ?><br><?= h($r['location']) ?><?php endif; ?>
+                        </p>
+                        <form method="post" action="<?= h(base_url('employer/talent-database/invite.php')) ?>" style="margin-top:0.75rem;">
+                            <?= Csrf::field() ?>
+                            <input type="hidden" name="applicant_id" value="<?= (int) $r['user_id'] ?>">
+                            <button type="submit" class="btn btn-primary btn-block">Invite</button>
+                        </form>
+                    </div>
+                <?php endforeach; ?>
             </div>
 
             <?php if ($results['totalPages'] > 1): ?>

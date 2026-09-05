@@ -71,8 +71,8 @@ $logoUrl = base_url('img/logo.png');
                     <a href="<?= h(base_url(Auth::dashboardPathForRole((string) Auth::role()))) ?>" class="btn btn-outline">Dashboard</a>
                     <a href="<?= h(base_url('logout.php')) ?>" class="btn btn-primary">Log Out</a>
                 <?php else: ?>
-                    <a href="<?= h(base_url('login.php')) ?>" class="btn btn-outline">Log In</a>
-                    <a href="<?= h(base_url('register.php')) ?>" class="btn btn-primary">Sign Up</a>
+                    <a href="<?= h(base_url('auth.php?tab=login')) ?>" class="btn btn-outline">Log In</a>
+                    <a href="<?= h(base_url('auth.php?tab=signup')) ?>" class="btn btn-primary">Sign Up</a>
                 <?php endif; ?>
             </div>
         </nav>

@@ -24,29 +24,37 @@ class ApplicantProfile
         return (int) Database::connection()->lastInsertId();
     }
 
-    public static function update(
-        int $userId,
-        string $headline,
-        string $bio,
-        string $location,
-        string $skills,
-        ?string $school = null,
-        ?string $degree = null,
-        ?string $fieldOfStudy = null,
-        ?int $graduationYear = null,
-        bool $profileVisibility = true
-    ): void {
+    /**
+     * Updates any subset of profile fields by column name. Only keys present in
+     * $fields are written — callers pass just the fields their form/step collects.
+     *
+     * Recognized keys: headline, bio, location, skills, school, degree,
+     * field_of_study, graduation_year, profile_visibility, date_of_birth, gender,
+     * street_address, city, province, zip_code, experience_level,
+     * expected_salary_min, expected_salary_max.
+     */
+    public static function update(int $userId, array $fields): void
+    {
+        $allowedColumns = [
+            'headline', 'bio', 'location', 'skills', 'school', 'degree',
+            'field_of_study', 'graduation_year', 'profile_visibility',
+            'date_of_birth', 'gender', 'street_address', 'city', 'province', 'zip_code',
+            'experience_level', 'expected_salary_min', 'expected_salary_max',
+        ];
+
+        $columns = array_values(array_intersect($allowedColumns, array_keys($fields)));
+        if (empty($columns)) {
+            return;
+        }
+
+        $setClause = implode(', ', array_map(static fn (string $col): string => "{$col} = ?", $columns));
+        $values = array_map(static fn (string $col) => $fields[$col], $columns);
+        $values[] = $userId;
+
         $stmt = Database::connection()->prepare(
-            'UPDATE applicant_profiles
-             SET headline = ?, bio = ?, location = ?, skills = ?, school = ?, degree = ?, field_of_study = ?, graduation_year = ?, profile_visibility = ?
-             WHERE user_id = ?'
+            "UPDATE applicant_profiles SET {$setClause} WHERE user_id = ?"
         );
-        $stmt->execute([
-            $headline, $bio, $location, $skills,
-            $school ?: null, $degree ?: null, $fieldOfStudy ?: null, $graduationYear ?: null,
-            $profileVisibility ? 1 : 0,
-            $userId,
-        ]);
+        $stmt->execute($values);
     }
 
     public static function setCurrentResume(int $userId, int $resumeId): void
@@ -55,6 +63,14 @@ class ApplicantProfile
             'UPDATE applicant_profiles SET current_resume_id = ? WHERE user_id = ?'
         );
         $stmt->execute([$resumeId, $userId]);
+    }
+
+    public static function updatePhoto(int $userId, string $photoPath): void
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE applicant_profiles SET photo_path = ? WHERE user_id = ?'
+        );
+        $stmt->execute([$photoPath, $userId]);
     }
 
     public static function setVisibility(int $userId, bool $visible): void

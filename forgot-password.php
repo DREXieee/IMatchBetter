@@ -45,7 +45,7 @@ require __DIR__ . '/includes/header.php';
 
         <?php if ($submitted): ?>
             <p>If an account exists for that email, we've sent a password reset link. It expires in 30 minutes.</p>
-            <a href="<?= h(base_url('login.php')) ?>" class="btn btn-outline btn-block">Back to Log In</a>
+            <a href="<?= h(base_url('auth.php?tab=login')) ?>" class="btn btn-outline btn-block">Back to Log In</a>
         <?php else: ?>
             <p class="form-hint">Enter your email and we'll send you a reset link.</p>
             <form method="post" action="<?= h(base_url('forgot-password.php')) ?>" novalidate>

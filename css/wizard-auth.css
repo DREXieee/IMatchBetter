@@ -1,0 +1,259 @@
+/* ==========================================================================
+   Split-screen auth shell + step wizard components.
+   Loaded only on auth.php and the applicant profile wizard via
+   $extraStylesheets — not part of the global component layer.
+   ========================================================================== */
+
+/* auth.php renders its own full-viewport shell instead of the site chrome —
+   the global header/footer are still included (for CSRF/flash/session
+   plumbing) but visually hidden here. */
+body.auth-page .site-header,
+body.auth-page .site-footer {
+    display: none;
+}
+
+/* -------------------------------------------------------------------------
+   Split-screen auth shell
+   ------------------------------------------------------------------------- */
+.auth-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.auth-hero {
+    flex: 1 1 42%;
+    background: var(--color-primary);
+    color: #fff;
+    padding: var(--space-6) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-4);
+    min-width: 320px;
+}
+.auth-hero-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    opacity: 0.85;
+}
+.auth-hero h1 { color: #fff; margin: 0; }
+.auth-hero p { color: rgba(255, 255, 255, 0.85); max-width: 40ch; margin: 0; }
+
+.auth-feature-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+.auth-feature-pill {
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.auth-panel {
+    flex: 1 1 58%;
+    background: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-5);
+    min-width: 320px;
+}
+.auth-panel-inner { width: 100%; max-width: 440px; }
+
+@media (max-width: 767px) {
+    .auth-hero { padding: var(--space-5) var(--space-4); text-align: center; align-items: center; }
+    .auth-hero p { max-width: none; }
+}
+
+/* Sign In / Create Account tabs */
+.auth-tabs {
+    display: flex;
+    gap: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-4);
+}
+.auth-tab {
+    background: none;
+    border: none;
+    padding: var(--space-2) 0.1rem var(--space-3);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+.auth-tab.is-active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+.auth-tab-panel[hidden] { display: none; }
+
+/* -------------------------------------------------------------------------
+   Step progress indicator — shared by the 2-step signup and 4-step profile
+   wizard. Markup: .step-progress > .step-progress-item* (each holding a
+   .step-progress-circle), separated by .step-progress-line.
+   ------------------------------------------------------------------------- */
+.step-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-5);
+}
+.step-progress-item {
+    display: flex;
+    align-items: center;
+}
+.step-progress-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--color-border);
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.step-progress-line {
+    width: clamp(24px, 6vw, 64px);
+    height: 2px;
+    background: var(--color-border);
+    margin: 0 var(--space-2);
+    transition: background 0.2s ease;
+}
+.step-progress-item.is-active .step-progress-circle,
+.step-progress-item.is-done .step-progress-circle {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: #fff;
+}
+.step-progress-item.is-active .step-progress-circle {
+    background: var(--color-bg);
+    color: var(--color-primary);
+}
+.step-progress-item.is-done + .step-progress-line,
+.step-progress-line.is-done {
+    background: var(--color-primary);
+}
+
+/* Step panels — [data-step] fieldsets shown/hidden by js/step-wizard.js */
+[data-step-panel] { border: none; padding: 0; margin: 0; }
+[data-step-panel][hidden] { display: none; }
+.step-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+}
+.step-actions .btn { min-width: 110px; }
+
+/* -------------------------------------------------------------------------
+   Skill chip picker
+   ------------------------------------------------------------------------- */
+.chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+.chip {
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-chip-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.chip.is-selected {
+    background: var(--color-chip-bg-selected);
+    border-color: var(--color-chip-bg-selected);
+    color: var(--color-chip-text-selected);
+}
+.chip-input-row {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+.chip-input-row .form-control { flex: 1; }
+.chip-selected-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+.chip-selected {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.5rem 0.35rem 0.9rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-chip-bg-selected);
+    color: var(--color-chip-text-selected);
+    font-size: 0.85rem;
+}
+.chip-remove {
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    line-height: 1;
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    padding: 0;
+}
+
+/* -------------------------------------------------------------------------
+   Avatar upload (interactive) — circular preview + camera-icon button
+   ------------------------------------------------------------------------- */
+.avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+.avatar-upload-preview {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.avatar-upload-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+.avatar-upload-preview.has-image img { display: block; }
+.avatar-upload-preview-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+}
+.avatar-upload-preview.has-image .avatar-upload-preview-icon { display: none; }
+.avatar-upload-input { display: none; }

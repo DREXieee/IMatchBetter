@@ -42,7 +42,10 @@ require __DIR__ . '/../../includes/header.php';
                 <p style="white-space:pre-line;"><?= h($application['cover_letter']) ?></p>
             <?php endif; ?>
 
-            <p><a href="<?= h(base_url('download.php?resume_id=' . $application['resume_id'])) ?>" class="btn btn-outline">Download Resume</a></p>
+            <p>
+                <a href="<?= h(base_url('download.php?resume_id=' . $application['resume_id'])) ?>" class="btn btn-outline">Download Resume</a>
+                <a href="<?= h(base_url('employer/messages.php?with=' . (int) $application['applicant_id'])) ?>" class="btn btn-outline">Message Applicant</a>
+            </p>
 
             <p><a href="<?= h(base_url('complaints/create.php?against_type=application&against_id=' . $application['id'])) ?>" class="form-hint">Report this applicant</a></p>
 

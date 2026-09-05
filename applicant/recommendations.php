@@ -25,7 +25,7 @@ require __DIR__ . '/../includes/header.php';
 
         <?php if (empty($jobs)): ?>
             <div class="card empty-state">
-                No recommendations yet. <a href="<?= h(base_url('applicant/profile.php')) ?>">Add your skills</a> to see personalized matches.
+                No recommendations yet. <a href="<?= h(base_url('applicant/profile-wizard.php')) ?>">Add your skills</a> to see personalized matches.
             </div>
         <?php else: ?>
             <div class="grid grid-2">

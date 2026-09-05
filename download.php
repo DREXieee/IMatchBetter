@@ -135,5 +135,34 @@ if (isset($_GET['logo'])) {
     exit;
 }
 
+if (isset($_GET['photo'])) {
+    // Profile photos aren't sensitive — served publicly, but only ever a filename we
+    // already recognize from applicant_profiles, never an arbitrary path.
+    $filename = basename((string) $_GET['photo']);
+
+    $stmt = Database::connection()->prepare("SELECT photo_path FROM applicant_profiles WHERE photo_path = ?");
+    $stmt->execute(['uploads/avatars/' . $filename]);
+    $photoPath = $stmt->fetchColumn();
+
+    if (!$photoPath) {
+        http_response_code(404);
+        exit('Photo not found.');
+    }
+
+    $fullPath = BASE_PATH . '/' . $photoPath;
+
+    if (!is_file($fullPath)) {
+        http_response_code(404);
+        exit('Photo not found.');
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    header('Content-Type: ' . finfo_file($finfo, $fullPath));
+    finfo_close($finfo);
+    header('Content-Length: ' . filesize($fullPath));
+    readfile($fullPath);
+    exit;
+}
+
 http_response_code(400);
 exit('No file specified.');

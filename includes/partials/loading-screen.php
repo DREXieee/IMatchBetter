@@ -22,8 +22,8 @@ unset($_SESSION['show_login_loading_screen']);
         <svg class="loading-glyph" viewBox="0 0 200 200" aria-hidden="true">
             <defs>
                 <linearGradient id="loading-glyph-gradient" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="#3b82f6"/>
-                    <stop offset="1" stop-color="#22d3ee"/>
+                    <stop offset="0" stop-color="#2f6fed"/>
+                    <stop offset="1" stop-color="#17b897"/>
                 </linearGradient>
             </defs>
             <path class="loading-glyph-path" d="M70 70 L130 130"/>

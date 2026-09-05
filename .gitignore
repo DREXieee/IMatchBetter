@@ -5,6 +5,8 @@
 !/uploads/logos/.gitkeep
 /uploads/certificates/*
 !/uploads/certificates/.gitkeep
+/uploads/avatars/*
+!/uploads/avatars/.gitkeep
 .env
 /logs/*.log
 /.phpunit.cache/

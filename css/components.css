@@ -190,3 +190,53 @@
 .notification-item { padding: var(--space-3); border-bottom: 1px solid var(--color-border); }
 .notification-item.is-unread { background: var(--color-bg-alt); border-left: 3px solid var(--color-primary); }
 .notification-item:last-child { border-bottom: none; }
+
+/* Card variant with a stronger, near-black outline — used on marketing-adjacent
+   surfaces (auth panels, job-seeker cards) that want more visual weight than the
+   default light-gray-bordered .card. */
+.card-outlined {
+    border-color: var(--color-outline-strong);
+}
+
+/* Avatars — a circular photo (or initials-fallback background) at a few sizes,
+   usable anywhere a person needs a picture: profile headers, person cards,
+   message threads. */
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-pill);
+    object-fit: cover;
+    background: var(--color-bg-alt);
+    flex-shrink: 0;
+}
+.avatar-sm { width: 32px; height: 32px; }
+.avatar-lg { width: 88px; height: 88px; }
+
+/* Person card — shared shape for the Network people-grid and the employer
+   Talent Database candidate-grid: photo, name, subtitle, one action button. */
+.person-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-2);
+}
+.person-card .avatar { width: 64px; height: 64px; margin-bottom: var(--space-1); }
+.person-card-name { font-weight: 700; margin: 0; }
+.person-card-subtitle { color: var(--color-text-muted); font-size: 0.9rem; margin: 0 0 var(--space-2); }
+
+/* Static skill chip display (non-interactive) — used wherever skills are shown
+   as tags instead of comma-separated text, e.g. the profile view page. */
+.chip-static-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+.chip-static {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-chip-bg);
+    color: var(--color-text);
+    font-size: 0.85rem;
+}

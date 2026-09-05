@@ -46,11 +46,6 @@ $extraScripts = ['js/scroll-animate.js'];
 require __DIR__ . '/includes/header.php';
 ?>
 <section class="hero">
-    <div class="hero-mesh" aria-hidden="true">
-        <div class="mesh-blob mesh-blob-1"></div>
-        <div class="mesh-blob mesh-blob-2"></div>
-        <div class="mesh-blob mesh-blob-3"></div>
-    </div>
     <div class="container hero-grid">
         <div data-animate="fade-up">
             <span class="eyebrow-pill">Reviewed employers. Real listings.</span>
@@ -224,7 +219,6 @@ require __DIR__ . '/includes/header.php';
 <section class="employer-cta-section">
     <div class="container">
         <div class="employer-cta" data-animate="fade-up">
-            <div class="employer-cta-mesh" aria-hidden="true"></div>
             <div class="employer-cta-content">
                 <h2>Hiring? Get in front of real candidates.</h2>
                 <p>Register your company, get approved by our team, and start posting jobs in minutes.</p>

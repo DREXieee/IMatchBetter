@@ -75,6 +75,12 @@ class User
         $stmt->execute([$userId]);
     }
 
+    public static function updateContactInfo(int $userId, string $fullName, ?string $phone): void
+    {
+        $stmt = Database::connection()->prepare('UPDATE users SET full_name = ?, phone = ? WHERE id = ?');
+        $stmt->execute([$fullName, $phone ?: null, $userId]);
+    }
+
     public static function updatePassword(int $userId, string $newPassword): void
     {
         $stmt = Database::connection()->prepare('UPDATE users SET password_hash = ? WHERE id = ?');

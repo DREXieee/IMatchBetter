@@ -20,6 +20,13 @@ class FileUploadService
     ];
     private const LOGO_MAX_SIZE = 2 * 1024 * 1024; // 2MB
 
+    private const AVATAR_MIMES = [
+        'image/png' => 'png',
+        'image/jpeg' => 'jpg',
+        'image/webp' => 'webp',
+    ];
+    private const AVATAR_MAX_SIZE = 2 * 1024 * 1024; // 2MB
+
     private const CERTIFICATE_MIMES = [
         'application/pdf' => 'pdf',
         'application/msword' => 'doc',
@@ -42,12 +49,36 @@ class FileUploadService
         return self::store($file, 'logos', self::LOGO_MIMES, self::LOGO_MAX_SIZE);
     }
 
+    public static function storePhoto(array $file): array
+    {
+        return self::store($file, 'avatars', self::AVATAR_MIMES, self::AVATAR_MAX_SIZE);
+    }
+
     public static function storeCertificate(array $file): array
     {
         return self::store($file, 'certificates', self::CERTIFICATE_MIMES, self::CERTIFICATE_MAX_SIZE);
     }
 
-    private static function store(array $file, string $subdir, array $allowedMimes, int $maxSize): array
+    /**
+     * Checks type/size only, without touching disk — lets a caller validate several
+     * files up front and only persist any of them once all have passed.
+     */
+    public static function validateResume(array $file): void
+    {
+        self::validate($file, self::RESUME_MIMES, self::RESUME_MAX_SIZE);
+    }
+
+    public static function validatePhoto(array $file): void
+    {
+        self::validate($file, self::AVATAR_MIMES, self::AVATAR_MAX_SIZE);
+    }
+
+    public static function validateCertificate(array $file): void
+    {
+        self::validate($file, self::CERTIFICATE_MIMES, self::CERTIFICATE_MAX_SIZE);
+    }
+
+    private static function validate(array $file, array $allowedMimes, int $maxSize): string
     {
         if (empty($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
             throw new RuntimeException('Please choose a file to upload.');
@@ -71,6 +102,12 @@ class FileUploadService
             throw new RuntimeException("Unsupported file type. Allowed types: {$allowed}.");
         }
 
+        return $mimeType;
+    }
+
+    private static function store(array $file, string $subdir, array $allowedMimes, int $maxSize): array
+    {
+        $mimeType = self::validate($file, $allowedMimes, $maxSize);
         $extension = $allowedMimes[$mimeType];
         $storedFilename = bin2hex(random_bytes(16)) . '.' . $extension;
         $destinationDir = BASE_PATH . '/uploads/' . $subdir;

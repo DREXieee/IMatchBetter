@@ -2,15 +2,8 @@
 
 require __DIR__ . '/includes/bootstrap.php';
 
-use IMatchBetter\Auth\Auth;
 use IMatchBetter\Auth\Csrf;
 use IMatchBetter\Auth\Guard;
-use IMatchBetter\Helpers\Validator;
-use IMatchBetter\Models\EmailVerification;
-use IMatchBetter\Models\EmployerProfile;
-use IMatchBetter\Models\Notification;
-use IMatchBetter\Models\User;
-use IMatchBetter\Services\Mailer;
 
 Guard::requireGuest();
 
@@ -23,59 +16,7 @@ $companyDescription = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verifyRequestOrFail();
-
-    $fullName = trim($_POST['full_name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $password = (string) ($_POST['password'] ?? '');
-    $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
-    $companyName = trim($_POST['company_name'] ?? '');
-    $companyWebsite = trim($_POST['company_website'] ?? '');
-    $companyDescription = trim($_POST['company_description'] ?? '');
-
-    if ($fullName === '') {
-        $errors['full_name'] = 'Full name is required.';
-    }
-    if (!Validator::isEmail($email)) {
-        $errors['email'] = 'Enter a valid email address.';
-    } elseif (User::emailExists($email)) {
-        $errors['email'] = 'An account with this email already exists.';
-    }
-    if (!Validator::isStrongPassword($password)) {
-        $errors['password'] = 'Password must be at least 8 characters.';
-    } elseif ($password !== $confirmPassword) {
-        $errors['confirm_password'] = 'Passwords do not match.';
-    }
-    if ($companyName === '') {
-        $errors['company_name'] = 'Company name is required.';
-    }
-
-    if (empty($errors)) {
-        $userId = User::create($email, $password, 'employer', $fullName);
-        EmployerProfile::create($userId, $companyName, $companyWebsite ?: null, $companyDescription ?: null);
-
-        foreach (Notification::adminUserIds() as $adminId) {
-            Notification::create(
-                (int) $adminId,
-                'employer_registered',
-                "New employer request from {$companyName} needs review.",
-                $userId,
-                'employer_profile'
-            );
-        }
-
-        $token = EmailVerification::create($userId);
-        Mailer::send(
-            $email,
-            $fullName,
-            'Confirm your IMatchBetter email',
-            'verify-email',
-            ['verifyUrl' => base_url('verify-email.php?token=' . $token), 'fullName' => $fullName]
-        );
-
-        Auth::attempt($email, $password);
-        flash('info', 'Your employer account was created. Check your email to verify your account — an admin also needs to approve it before you can post jobs.');
-        redirect('/employer/pending-approval.php');
-    }
+    require __DIR__ . '/includes/handlers/register-employer-handler.php';
 }
 
 $pageTitle = 'Sign Up as Employer — IMatchBetter';
@@ -132,7 +73,7 @@ require __DIR__ . '/includes/header.php';
             <button type="submit" class="btn btn-primary btn-block">Submit for approval</button>
         </form>
 
-        <p style="margin-top:1rem;">Already have an account? <a href="<?= h(base_url('login.php')) ?>">Log in</a></p>
+        <p style="margin-top:1rem;">Already have an account? <a href="<?= h(base_url('auth.php?tab=login')) ?>">Log in</a></p>
     </div>
 </main>
 <?php require __DIR__ . '/includes/footer.php'; ?>

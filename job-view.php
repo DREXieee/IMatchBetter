@@ -74,7 +74,7 @@ require __DIR__ . '/includes/header.php';
         <?php endif; ?>
 
         <?php if (!Auth::check()): ?>
-            <a href="<?= h(base_url('login.php')) ?>" class="btn btn-primary">Log in to Apply</a>
+            <a href="<?= h(base_url('auth.php?tab=login')) ?>" class="btn btn-primary">Log in to Apply</a>
         <?php elseif (Auth::role() !== 'applicant'): ?>
             <p class="form-hint">Only applicant accounts can apply to jobs.</p>
         <?php elseif ($alreadyApplied): ?>

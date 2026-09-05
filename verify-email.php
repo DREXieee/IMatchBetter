@@ -20,7 +20,7 @@ if (!$verificationRow) {
             <?php if (Auth::check()): ?>
                 <a href="<?= h(base_url('verify-email-pending.php')) ?>" class="btn btn-primary btn-block">Request a new link</a>
             <?php else: ?>
-                <a href="<?= h(base_url('login.php')) ?>" class="btn btn-primary btn-block">Log in to request a new link</a>
+                <a href="<?= h(base_url('auth.php?tab=login')) ?>" class="btn btn-primary btn-block">Log in to request a new link</a>
             <?php endif; ?>
         </div>
     </main>

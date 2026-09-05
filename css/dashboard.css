@@ -59,3 +59,16 @@ table.data-table {
     padding: var(--space-6) var(--space-3);
     color: var(--color-text-muted);
 }
+
+/* 3-column applicant dashboard: profile summary / job matches / insights+network */
+.dashboard-columns-3 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+@media (min-width: 992px) {
+    .dashboard-columns-3 {
+        grid-template-columns: 260px 1fr 300px;
+        align-items: start;
+    }
+}
