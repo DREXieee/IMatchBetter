@@ -27,8 +27,9 @@ if (Job::find($jobId)) {
 }
 
 // Only follow the redirect hint if it's a same-app relative path, to avoid an open redirect.
+// Backslashes are rejected too since some browsers normalize "/\evil.com" into "//evil.com".
 $redirectTo = (string) ($_POST['redirect'] ?? '');
-if (preg_match('#^/(?!/)[^\r\n]*$#', $redirectTo) && !str_contains($redirectTo, '://')) {
+if (preg_match('#^/(?![/\\\\])[^\r\n]*$#', $redirectTo) && !str_contains($redirectTo, '://') && !str_contains($redirectTo, '\\')) {
     header('Location: ' . $redirectTo);
     exit;
 }

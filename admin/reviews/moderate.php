@@ -28,10 +28,12 @@ if (!in_array($type, ['employer', 'applicant'], true) || !in_array($action, ['ap
 
 $status = $action === 'approve' ? 'approved' : 'rejected';
 $adminId = (int) Auth::id();
+$found = false;
 
 if ($type === 'employer') {
     $review = EmployerReview::find($id);
     if ($review) {
+        $found = true;
         EmployerReview::moderate($id, $status, $adminId);
         AuditLogger::log($adminId, 'employer_review_' . $status, 'employer_review', $id);
 
@@ -48,6 +50,7 @@ if ($type === 'employer') {
 } else {
     $review = ApplicantReview::find($id);
     if ($review) {
+        $found = true;
         ApplicantReview::moderate($id, $status, $adminId);
         AuditLogger::log($adminId, 'applicant_review_' . $status, 'applicant_review', $id);
 
@@ -63,5 +66,9 @@ if ($type === 'employer') {
     }
 }
 
-flash('success', 'Review ' . $status . '.');
+if ($found) {
+    flash('success', 'Review ' . $status . '.');
+} else {
+    flash('error', 'Review not found.');
+}
 redirect('/admin/reviews/index.php');
