@@ -25,7 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('/admin/jobs.php');
 }
 
-$jobs = Job::adminList(200, 0);
+$query = trim($_GET['q'] ?? '');
+$statusFilter = $_GET['status'] ?? '';
+$jobs = Job::adminList(200, 0, $query, $statusFilter);
 
 $role = 'admin';
 $pageTitle = 'Moderate Jobs — IMatchBetter';
@@ -37,8 +39,30 @@ require __DIR__ . '/../includes/header.php';
     <main class="dashboard-main">
         <h1>Moderate Jobs</h1>
 
+        <form method="get" action="<?= h(base_url('admin/jobs.php')) ?>" class="card" style="margin-bottom:1.5rem;">
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label class="form-label" for="q">Search by title or company</label>
+                    <input class="form-control" type="text" id="q" name="q" value="<?= h($query) ?>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="status">Status</label>
+                    <select class="form-control" id="status" name="status">
+                        <option value="" <?= $statusFilter === '' ? 'selected' : '' ?>>All statuses</option>
+                        <option value="open" <?= $statusFilter === 'open' ? 'selected' : '' ?>>Open</option>
+                        <option value="closed" <?= $statusFilter === 'closed' ? 'selected' : '' ?>>Closed</option>
+                        <option value="draft" <?= $statusFilter === 'draft' ? 'selected' : '' ?>>Draft</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+            <?php if ($query !== '' || $statusFilter !== ''): ?>
+                <a href="<?= h(base_url('admin/jobs.php')) ?>" class="btn btn-outline">Clear</a>
+            <?php endif; ?>
+        </form>
+
         <?php if (empty($jobs)): ?>
-            <div class="card empty-state">No jobs posted yet.</div>
+            <div class="card empty-state"><?= ($query !== '' || $statusFilter !== '') ? 'No jobs match your search.' : 'No jobs posted yet.' ?></div>
         <?php else: ?>
             <div class="table-wrap">
                 <table class="data-table">

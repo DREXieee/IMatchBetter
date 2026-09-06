@@ -108,11 +108,34 @@ class User
         return $value !== null && $value !== false;
     }
 
-    public static function all(int $limit = 50, int $offset = 0): array
+    /**
+     * @param string $query  matched against name/email, case-insensitive substring
+     * @param string $role   'applicant'|'employer'|'admin', or '' for any role
+     */
+    public static function all(int $limit = 50, int $offset = 0, string $query = '', string $role = ''): array
     {
-        $stmt = Database::connection()->prepare('SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?');
-        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
-        $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+        $where = [];
+        $params = [];
+
+        if ($query !== '') {
+            $where[] = '(full_name LIKE ? OR email LIKE ?)';
+            $params[] = '%' . $query . '%';
+            $params[] = '%' . $query . '%';
+        }
+        if (in_array($role, ['applicant', 'employer', 'admin'], true)) {
+            $where[] = 'role = ?';
+            $params[] = $role;
+        }
+
+        $whereSql = empty($where) ? '' : 'WHERE ' . implode(' AND ', $where);
+        $stmt = Database::connection()->prepare("SELECT * FROM users {$whereSql} ORDER BY created_at DESC LIMIT ? OFFSET ?");
+
+        $i = 1;
+        foreach ($params as $param) {
+            $stmt->bindValue($i++, $param);
+        }
+        $stmt->bindValue($i++, $limit, PDO::PARAM_INT);
+        $stmt->bindValue($i++, $offset, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll();

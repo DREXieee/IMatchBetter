@@ -30,7 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('/admin/users.php');
 }
 
-$users = User::all(200, 0);
+$query = trim($_GET['q'] ?? '');
+$roleFilter = $_GET['role'] ?? '';
+$users = User::all(200, 0, $query, $roleFilter);
 
 $role = 'admin';
 $pageTitle = 'Manage Users — IMatchBetter';
@@ -42,6 +44,31 @@ require __DIR__ . '/../includes/header.php';
     <main class="dashboard-main">
         <h1>Manage Users</h1>
 
+        <form method="get" action="<?= h(base_url('admin/users.php')) ?>" class="card" style="margin-bottom:1.5rem;">
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label class="form-label" for="q">Search by name or email</label>
+                    <input class="form-control" type="text" id="q" name="q" value="<?= h($query) ?>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="role">Role</label>
+                    <select class="form-control" id="role" name="role">
+                        <option value="" <?= $roleFilter === '' ? 'selected' : '' ?>>All roles</option>
+                        <option value="applicant" <?= $roleFilter === 'applicant' ? 'selected' : '' ?>>Job Seeker</option>
+                        <option value="employer" <?= $roleFilter === 'employer' ? 'selected' : '' ?>>Employer</option>
+                        <option value="admin" <?= $roleFilter === 'admin' ? 'selected' : '' ?>>Admin</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+            <?php if ($query !== '' || $roleFilter !== ''): ?>
+                <a href="<?= h(base_url('admin/users.php')) ?>" class="btn btn-outline">Clear</a>
+            <?php endif; ?>
+        </form>
+
+        <?php if (empty($users)): ?>
+            <div class="card empty-state">No users match your search.</div>
+        <?php else: ?>
         <div class="table-wrap">
             <table class="data-table">
                 <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th></th></tr></thead>
@@ -68,6 +95,7 @@ require __DIR__ . '/../includes/header.php';
                 </tbody>
             </table>
         </div>
+        <?php endif; ?>
     </main>
 </div>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

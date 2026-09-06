@@ -147,17 +147,41 @@ class Job
         return $job !== null && (int) $job['employer_id'] === $employerId;
     }
 
-    public static function adminList(int $limit = 100, int $offset = 0): array
+    /**
+     * @param string $query  matched against job title/company name, case-insensitive substring
+     * @param string $status 'open'|'closed'|'draft', or '' for any status
+     */
+    public static function adminList(int $limit = 100, int $offset = 0, string $query = '', string $status = ''): array
     {
+        $where = [];
+        $params = [];
+
+        if ($query !== '') {
+            $where[] = '(j.title LIKE ? OR ep.company_name LIKE ?)';
+            $params[] = '%' . $query . '%';
+            $params[] = '%' . $query . '%';
+        }
+        if (in_array($status, ['open', 'closed', 'draft'], true)) {
+            $where[] = 'j.status = ?';
+            $params[] = $status;
+        }
+
+        $whereSql = empty($where) ? '' : 'WHERE ' . implode(' AND ', $where);
         $stmt = Database::connection()->prepare(
-            'SELECT j.*, ep.company_name
+            "SELECT j.*, ep.company_name
              FROM jobs j
              JOIN employer_profiles ep ON ep.user_id = j.employer_id
+             {$whereSql}
              ORDER BY j.created_at DESC
-             LIMIT ? OFFSET ?'
+             LIMIT ? OFFSET ?"
         );
-        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
-        $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+
+        $i = 1;
+        foreach ($params as $param) {
+            $stmt->bindValue($i++, $param);
+        }
+        $stmt->bindValue($i++, $limit, PDO::PARAM_INT);
+        $stmt->bindValue($i++, $offset, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll();
