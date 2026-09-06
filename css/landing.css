@@ -24,7 +24,7 @@ body.landing-page {
     color: var(--lp-text);
 }
 
-body.landing-page a { color: var(--lp-primary); }
+body.landing-page a:not(.btn) { color: var(--lp-primary); }
 
 /* -------------------------------------------------------------------------
    Focus indicators — visible only for keyboard navigation (:focus-visible)
@@ -61,8 +61,8 @@ body.landing-page .site-header {
 body.landing-page .brand { color: var(--lp-text); }
 body.landing-page .brand span { color: var(--lp-primary); }
 
-body.landing-page .main-nav a { color: var(--lp-text-muted); position: relative; }
-body.landing-page .main-nav a:hover { color: var(--lp-text); text-decoration: none; }
+body.landing-page .main-nav a:not(.btn) { color: var(--lp-text-muted); position: relative; }
+body.landing-page .main-nav a:not(.btn):hover { color: var(--lp-text); text-decoration: none; }
 body.landing-page .main-nav > a:not(.btn)::after {
     content: '';
     position: absolute;

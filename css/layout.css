@@ -53,11 +53,11 @@
     gap: var(--space-4);
 }
 
-.main-nav a {
+.main-nav a:not(.btn) {
     color: var(--color-text);
     font-weight: 500;
 }
-.main-nav a:hover { color: var(--color-primary); text-decoration: none; }
+.main-nav a:not(.btn):hover { color: var(--color-primary); text-decoration: none; }
 
 .nav-actions { display: flex; gap: var(--space-2); align-items: center; }
 
