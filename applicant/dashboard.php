@@ -38,7 +38,7 @@ require __DIR__ . '/../includes/header.php';
                         <?php if (!empty($profile['photo_path'])): ?>
                             <img class="avatar avatar-lg" style="margin:0 auto 0.75rem;" alt="" src="<?= h(base_url('download.php?photo=' . basename($profile['photo_path']))) ?>">
                         <?php else: ?>
-                            <div class="avatar avatar-lg" style="margin:0 auto 0.75rem;"></div>
+                            <div class="avatar avatar-lg avatar-fallback" style="margin:0 auto 0.75rem;"><?= h(initials(Auth::fullName() ?? '')) ?></div>
                         <?php endif; ?>
                         <h3 style="margin-bottom:0;"><?= h(Auth::fullName()) ?></h3>
                         <p class="form-hint" style="margin:0 0 0.75rem;"><?= h($profile['headline'] ?? '') ?></p>

@@ -12,6 +12,7 @@
     </div>
 </footer>
 <script src="<?= h(base_url('js/nav-toggle.js')) ?>"></script>
+<script src="<?= h(base_url('js/password-toggle.js')) ?>"></script>
 <?php if (!empty($extraScripts)): foreach ($extraScripts as $script): ?>
 <script src="<?= h(base_url($script)) ?>"></script>
 <?php endforeach; endif; ?>

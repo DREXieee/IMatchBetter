@@ -52,6 +52,28 @@ if (!function_exists('email_button')) {
     }
 }
 
+if (!function_exists('initials')) {
+    /**
+     * First letter of the first word + first letter of the last word (e.g. "QA Lifecycle
+     * Tester" -> "QT"), for the circular avatar placeholder shown when no photo is set.
+     */
+    function initials(string $fullName): string
+    {
+        $words = preg_split('/\s+/', trim($fullName)) ?: [];
+        $words = array_filter($words, static fn (string $w): bool => $w !== '');
+        $words = array_values($words);
+
+        if (empty($words)) {
+            return '';
+        }
+        if (count($words) === 1) {
+            return mb_strtoupper(mb_substr($words[0], 0, 1));
+        }
+
+        return mb_strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[count($words) - 1], 0, 1));
+    }
+}
+
 if (!function_exists('redirect')) {
     function redirect(string $path): never
     {

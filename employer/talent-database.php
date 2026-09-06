@@ -74,7 +74,11 @@ require __DIR__ . '/../includes/header.php';
                 <?php foreach ($results['graduates'] as $r): ?>
                     <div class="card person-card" style="align-items:stretch; text-align:left;">
                         <div style="display:flex; align-items:center; gap:0.75rem;">
-                            <div class="avatar"></div>
+                            <?php if (!empty($r['photo_path'])): ?>
+                                <img class="avatar" alt="" src="<?= h(base_url('download.php?photo=' . basename($r['photo_path']))) ?>">
+                            <?php else: ?>
+                                <div class="avatar avatar-fallback"><?= h(initials($r['full_name'])) ?></div>
+                            <?php endif; ?>
                             <div>
                                 <p class="person-card-name" style="margin:0;"><?= h($r['full_name']) ?></p>
                                 <p class="person-card-subtitle" style="margin:0;"><?= h($r['headline'] ?? '') ?> <?= !empty($r['headline']) && !empty($r['school']) ? '·' : '' ?> <?= h($r['school'] ?? '') ?></p>

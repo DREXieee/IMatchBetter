@@ -78,7 +78,7 @@ class Connection
     {
         $stmt = Database::connection()->prepare(
             "SELECT c.*, u.id AS other_id, u.full_name AS other_name, u.role AS other_role,
-                    ap.headline AS other_headline, ep.company_name AS other_company
+                    ap.headline AS other_headline, ap.photo_path AS other_photo_path, ep.company_name AS other_company
              FROM connections c
              JOIN users u ON u.id = CASE WHEN c.requester_id = ? THEN c.recipient_id ELSE c.requester_id END
              LEFT JOIN applicant_profiles ap ON ap.user_id = u.id
@@ -98,7 +98,7 @@ class Connection
     {
         $stmt = Database::connection()->prepare(
             "SELECT c.*, u.id AS other_id, u.full_name AS other_name, u.role AS other_role,
-                    ap.headline AS other_headline, ep.company_name AS other_company
+                    ap.headline AS other_headline, ap.photo_path AS other_photo_path, ep.company_name AS other_company
              FROM connections c
              JOIN users u ON u.id = c.requester_id
              LEFT JOIN applicant_profiles ap ON ap.user_id = u.id

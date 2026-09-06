@@ -48,7 +48,7 @@ require __DIR__ . '/../includes/header.php';
                         src="<?= h(base_url('download.php?photo=' . basename($profile['photo_path']))) ?>"
                     >
                 <?php else: ?>
-                    <div class="avatar avatar-lg" style="border:4px solid var(--color-bg); margin-top:-44px;"></div>
+                    <div class="avatar avatar-lg avatar-fallback" style="border:4px solid var(--color-bg); margin-top:-44px;"><?= h(initials($user['full_name'] ?? '')) ?></div>
                 <?php endif; ?>
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
                     <div>

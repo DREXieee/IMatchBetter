@@ -9,6 +9,19 @@
 
 use IMatchBetter\Auth\Csrf;
 
+if (!function_exists('render_avatar')) {
+    /**
+     * Renders a photo avatar if one exists, else a solid initials placeholder.
+     */
+    function render_avatar(string $name, ?string $photoPath): void
+    {
+        if (!empty($photoPath)) {
+            echo '<div class="avatar avatar-lg" style="background-image:url(\'' . h(base_url('download.php?photo=' . basename($photoPath))) . '\'); background-size:cover;"></div>';
+        } else {
+            echo '<div class="avatar avatar-lg avatar-fallback">' . h(initials($name)) . '</div>';
+        }
+    }
+}
 ?>
 <h1>Grow your network</h1>
 <p>Connect with peers, mentors, and recruiters</p>
@@ -18,11 +31,7 @@ use IMatchBetter\Auth\Csrf;
     <div class="grid grid-3" style="margin-bottom:1.5rem;">
         <?php foreach ($pendingIncoming as $request): ?>
             <div class="card person-card">
-                <div class="avatar avatar-lg"
-                    <?php if (!empty($request['photo_path'])): ?>
-                        style="background-image:url('<?= h(base_url('download.php?photo=' . basename($request['photo_path']))) ?>'); background-size:cover;"
-                    <?php endif; ?>
-                ></div>
+                <?php render_avatar($request['other_name'], $request['other_photo_path'] ?? null); ?>
                 <p class="person-card-name"><?= h($request['other_name']) ?></p>
                 <p class="person-card-subtitle"><?= h($request['other_headline'] ?? $request['other_company'] ?? ucfirst($request['other_role'])) ?></p>
                 <div style="display:flex; gap:0.5rem;">
@@ -48,7 +57,7 @@ use IMatchBetter\Auth\Csrf;
     <div class="grid grid-3" style="margin-bottom:1.5rem;">
         <?php foreach ($accepted as $connection): ?>
             <div class="card person-card">
-                <div class="avatar avatar-lg"></div>
+                <?php render_avatar($connection['other_name'], $connection['other_photo_path'] ?? null); ?>
                 <p class="person-card-name"><?= h($connection['other_name']) ?></p>
                 <p class="person-card-subtitle"><?= h($connection['other_headline'] ?? $connection['other_company'] ?? ucfirst($connection['other_role'])) ?></p>
                 <a href="<?= h(base_url($role . '/messages.php?with=' . (int) $connection['other_id'])) ?>" class="btn btn-outline">Message</a>
@@ -64,11 +73,7 @@ use IMatchBetter\Auth\Csrf;
     <div class="grid grid-3">
         <?php foreach ($suggestions as $person): ?>
             <div class="card person-card">
-                <div class="avatar avatar-lg"
-                    <?php if (!empty($person['photo_path'])): ?>
-                        style="background-image:url('<?= h(base_url('download.php?photo=' . basename($person['photo_path']))) ?>'); background-size:cover;"
-                    <?php endif; ?>
-                ></div>
+                <?php render_avatar($person['full_name'], $person['photo_path'] ?? null); ?>
                 <p class="person-card-name"><?= h($person['full_name']) ?></p>
                 <p class="person-card-subtitle"><?= h($person['applicant_headline'] ?? $person['company_name'] ?? ucfirst($person['role'])) ?></p>
                 <form method="post" action="<?= h(base_url('network/connect.php')) ?>">

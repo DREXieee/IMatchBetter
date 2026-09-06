@@ -147,6 +147,11 @@
 .job-card-save-btn:hover {
     background: var(--color-bg-alt);
 }
+/* The save button floats over the card's top-left corner — give the title
+   room to clear it instead of letting the two overlap. */
+.job-card-save-form + .job-card > h3:first-child {
+    margin-top: var(--space-4);
+}
 .job-card-company {
     color: var(--color-text-muted);
     margin-bottom: var(--space-2);
@@ -191,6 +196,29 @@
 .notification-item.is-unread { background: var(--color-bg-alt); border-left: 3px solid var(--color-primary); }
 .notification-item:last-child { border-bottom: none; }
 
+/* Password show/hide toggle — added automatically by js/password-toggle.js */
+.password-field-wrap {
+    position: relative;
+    display: block;
+}
+.password-field-wrap input {
+    padding-right: 3.4rem;
+}
+.password-field-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.25rem 0.4rem;
+}
+.password-field-toggle:hover { text-decoration: underline; }
+
 /* Card variant with a stronger, near-black outline — used on marketing-adjacent
    surfaces (auth panels, job-seeker cards) that want more visual weight than the
    default light-gray-bordered .card. */
@@ -212,6 +240,21 @@
 .avatar-sm { width: 32px; height: 32px; }
 .avatar-lg { width: 88px; height: 88px; }
 
+/* Initials placeholder — used on a <div class="avatar avatar-fallback"> instead
+   of an <img> when the person has no photo, so an empty avatar reads as "this
+   person's initials" rather than a blank gray dot. */
+.avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+}
+.avatar-sm.avatar-fallback { font-size: 0.75rem; }
+.avatar-lg.avatar-fallback { font-size: 1.75rem; }
+
 /* Person card — shared shape for the Network people-grid and the employer
    Talent Database candidate-grid: photo, name, subtitle, one action button. */
 .person-card {
@@ -222,6 +265,7 @@
     gap: var(--space-2);
 }
 .person-card .avatar { width: 64px; height: 64px; margin-bottom: var(--space-1); }
+.person-card .avatar-fallback { font-size: 1.25rem; }
 .person-card-name { font-weight: 700; margin: 0; }
 .person-card-subtitle { color: var(--color-text-muted); font-size: 0.9rem; margin: 0 0 var(--space-2); }
 
