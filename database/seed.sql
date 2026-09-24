@@ -70,6 +70,11 @@ VALUES
 UPDATE jobs SET offers_training = 1, career_growth_notes = 'Structured mentorship track with a promotion review every 6 months.'
 WHERE slug = 'front-end-developer';
 
+-- Seed jobs are inserted directly as 'open', bypassing the app's Job::create() approval
+-- gate — mark them approved so they behave like real approved postings (editable without
+-- being pulled back into the pending-review queue).
+UPDATE jobs SET approval_status = 'approved' WHERE status = 'open';
+
 -- Skill tags for the seed jobs, so the recommendation engine has real data to match against.
 INSERT INTO skills (name, slug) VALUES
     ('HTML', 'html'),

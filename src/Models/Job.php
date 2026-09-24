@@ -49,9 +49,15 @@ class Job
     {
         $slug = self::uniqueSlug($data['title']);
 
+        // A brand-new job never goes live immediately — if the employer asked to publish it,
+        // it's held as a draft pending admin approval (see admin/jobs/approve.php).
+        $wantsOpen = $data['status'] === 'open';
+        $storedStatus = $wantsOpen ? 'draft' : $data['status'];
+        $approvalStatus = $wantsOpen ? 'pending' : 'not_required';
+
         $stmt = Database::connection()->prepare(
-            'INSERT INTO jobs (employer_id, title, slug, description, requirements, location, employment_type, salary_min, salary_max, salary_currency, category, offers_training, career_growth_notes, status, posted_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO jobs (employer_id, title, slug, description, requirements, employment_process, scheduling_process, location, employment_type, salary_min, salary_max, salary_currency, category, offers_training, career_growth_notes, status, approval_status, approval_requested_at, posted_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         $stmt->execute([
             $data['employer_id'],
@@ -59,6 +65,8 @@ class Job
             $slug,
             $data['description'],
             $data['requirements'] ?? null,
+            $data['employment_process'] ?? null,
+            $data['scheduling_process'] ?? null,
             $data['location'] ?? null,
             $data['employment_type'],
             $data['salary_min'] ?: null,
@@ -67,8 +75,10 @@ class Job
             $data['category'] ?? null,
             !empty($data['offers_training']) ? 1 : 0,
             $data['career_growth_notes'] ?? null,
-            $data['status'],
-            $data['status'] === 'open' ? date('Y-m-d H:i:s') : null,
+            $storedStatus,
+            $approvalStatus,
+            $wantsOpen ? date('Y-m-d H:i:s') : null,
+            null,
         ]);
 
         return (int) Database::connection()->lastInsertId();
@@ -78,10 +88,35 @@ class Job
     {
         $current = self::find($id);
         $slug = ($current && $current['title'] === $data['title']) ? $current['slug'] : self::uniqueSlug($data['title'], $id);
-        $postedAt = ($data['status'] === 'open' && empty($current['posted_at'])) ? date('Y-m-d H:i:s') : $current['posted_at'];
+
+        $alreadyApproved = $current && $current['approval_status'] === 'approved';
+        $wantsOpen = $data['status'] === 'open';
+
+        if ($wantsOpen && !$alreadyApproved) {
+            // First-time publish attempt, or resubmission after rejection — stays hidden
+            // from the public listings until an admin approves it.
+            $storedStatus = 'draft';
+            $approvalStatus = 'pending';
+            $approvalRequestedAt = date('Y-m-d H:i:s');
+            $rejectionReason = null;
+        } elseif ($data['status'] === 'draft' && $current && $current['approval_status'] === 'pending') {
+            // Employer withdrew a pending submission by saving it back as a draft.
+            $storedStatus = 'draft';
+            $approvalStatus = 'not_required';
+            $approvalRequestedAt = $current['approval_requested_at'];
+            $rejectionReason = $current['rejection_reason'];
+        } else {
+            // Already approved before (routine edit to a live job), or staying in draft/closed.
+            $storedStatus = $data['status'];
+            $approvalStatus = $current['approval_status'] ?? 'not_required';
+            $approvalRequestedAt = $current['approval_requested_at'] ?? null;
+            $rejectionReason = $current['rejection_reason'] ?? null;
+        }
+
+        $postedAt = ($storedStatus === 'open' && empty($current['posted_at'])) ? date('Y-m-d H:i:s') : $current['posted_at'];
 
         $stmt = Database::connection()->prepare(
-            'UPDATE jobs SET title=?, slug=?, description=?, requirements=?, location=?, employment_type=?, salary_min=?, salary_max=?, salary_currency=?, category=?, offers_training=?, career_growth_notes=?, status=?, posted_at=?
+            'UPDATE jobs SET title=?, slug=?, description=?, requirements=?, employment_process=?, scheduling_process=?, location=?, employment_type=?, salary_min=?, salary_max=?, salary_currency=?, category=?, offers_training=?, career_growth_notes=?, status=?, approval_status=?, approval_requested_at=?, rejection_reason=?, posted_at=?
              WHERE id = ?'
         );
         $stmt->execute([
@@ -89,6 +124,8 @@ class Job
             $slug,
             $data['description'],
             $data['requirements'] ?? null,
+            $data['employment_process'] ?? null,
+            $data['scheduling_process'] ?? null,
             $data['location'] ?? null,
             $data['employment_type'],
             $data['salary_min'] ?: null,
@@ -97,7 +134,10 @@ class Job
             $data['category'] ?? null,
             !empty($data['offers_training']) ? 1 : 0,
             $data['career_growth_notes'] ?? null,
-            $data['status'],
+            $storedStatus,
+            $approvalStatus,
+            $approvalRequestedAt,
+            $rejectionReason,
             $postedAt,
             $id,
         ]);
@@ -107,6 +147,39 @@ class Job
     {
         $stmt = Database::connection()->prepare("UPDATE jobs SET status = 'closed', closed_at = NOW() WHERE id = ?");
         $stmt->execute([$id]);
+    }
+
+    public static function pendingApproval(int $limit = 100, int $offset = 0): array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT j.*, ep.company_name
+             FROM jobs j
+             JOIN employer_profiles ep ON ep.user_id = j.employer_id
+             WHERE j.approval_status = "pending"
+             ORDER BY j.approval_requested_at ASC
+             LIMIT ? OFFSET ?'
+        );
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public static function approve(int $id, int $adminId): void
+    {
+        $stmt = Database::connection()->prepare(
+            "UPDATE jobs SET status = 'open', approval_status = 'approved', reviewed_by = ?, reviewed_at = NOW(), rejection_reason = NULL, posted_at = COALESCE(posted_at, NOW()) WHERE id = ?"
+        );
+        $stmt->execute([$adminId, $id]);
+    }
+
+    public static function reject(int $id, int $adminId, string $reason): void
+    {
+        $stmt = Database::connection()->prepare(
+            "UPDATE jobs SET status = 'draft', approval_status = 'rejected', reviewed_by = ?, reviewed_at = NOW(), rejection_reason = ? WHERE id = ?"
+        );
+        $stmt->execute([$adminId, $reason, $id]);
     }
 
     public static function find(int $id): ?array

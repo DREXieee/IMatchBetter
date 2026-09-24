@@ -27,7 +27,7 @@ require __DIR__ . '/includes/header.php';
         <h1>Register your company</h1>
         <p class="form-hint">An admin will review your request before you can post jobs.</p>
 
-        <form method="post" action="<?= h(base_url('register-employer.php')) ?>" novalidate>
+        <form method="post" action="<?= h(base_url('register-employer.php')) ?>" enctype="multipart/form-data" novalidate>
             <?= \IMatchBetter\Auth\Csrf::field() ?>
 
             <div class="form-group">
@@ -68,6 +68,19 @@ require __DIR__ . '/includes/header.php';
             <div class="form-group">
                 <label class="form-label" for="company_description">Short company description (optional)</label>
                 <textarea class="form-control" id="company_description" name="company_description" rows="3"><?= h($companyDescription) ?></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="valid_id">Valid government ID or company registration document</label>
+                <input class="form-control" type="file" id="valid_id" name="valid_id" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" required>
+                <p class="form-hint">Used by our admin team to verify your company before approval.</p>
+                <?php if (!empty($errors['valid_id'])): ?><div class="form-error"><?= h($errors['valid_id']) ?></div><?php endif; ?>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="company_photo">Photo of your company office/workspace</label>
+                <input class="form-control" type="file" id="company_photo" name="company_photo" accept=".png,.jpg,.jpeg,.webp" required>
+                <?php if (!empty($errors['company_photo'])): ?><div class="form-error"><?= h($errors['company_photo']) ?></div><?php endif; ?>
             </div>
 
             <button type="submit" class="btn btn-primary btn-block">Submit for approval</button>

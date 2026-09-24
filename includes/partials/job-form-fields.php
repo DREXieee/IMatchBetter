@@ -19,6 +19,16 @@ $employmentTypes = ['full_time' => 'Full-time', 'part_time' => 'Part-time', 'con
 </div>
 
 <div class="form-group">
+    <label class="form-label" for="employment_process">Employment process (optional)</label>
+    <textarea class="form-control" id="employment_process" name="employment_process" rows="4" placeholder="e.g. Application review, phone screen, technical interview, final interview, offer."><?= h($job['employment_process'] ?? '') ?></textarea>
+</div>
+
+<div class="form-group">
+    <label class="form-label" for="scheduling_process">Scheduling process (optional)</label>
+    <textarea class="form-control" id="scheduling_process" name="scheduling_process" rows="4" placeholder="e.g. Interviews are scheduled within 3 business days via email."><?= h($job['scheduling_process'] ?? '') ?></textarea>
+</div>
+
+<div class="form-group">
     <label class="form-label" for="required_skills">Required skills (comma-separated)</label>
     <input class="form-control" type="text" id="required_skills" name="required_skills" value="<?= h($job['required_skills'] ?? '') ?>" placeholder="PHP, MySQL, REST APIs">
     <p class="form-hint">Used to match and rank applicants — separate from the free-text requirements above.</p>
@@ -74,9 +84,10 @@ $employmentTypes = ['full_time' => 'Full-time', 'part_time' => 'Part-time', 'con
 
 <div class="form-group">
     <label class="form-label" for="status">Status</label>
+    <?php $publishLabel = (($job['approval_status'] ?? null) === 'approved') ? 'Publish (open for applications)' : 'Publish (submitted for admin approval)'; ?>
     <select class="form-control" id="status" name="status">
         <option value="draft" <?= ($job['status'] ?? 'draft') === 'draft' ? 'selected' : '' ?>>Save as draft (not visible to applicants)</option>
-        <option value="open" <?= ($job['status'] ?? '') === 'open' ? 'selected' : '' ?>>Publish (open for applications)</option>
+        <option value="open" <?= ($job['status'] ?? '') === 'open' ? 'selected' : '' ?>><?= h($publishLabel) ?></option>
         <?php if (($job['status'] ?? '') === 'closed'): ?>
             <option value="closed" selected>Closed (not accepting applications)</option>
         <?php endif; ?>

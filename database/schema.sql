@@ -32,6 +32,8 @@ CREATE TABLE employer_profiles (
     company_website       VARCHAR(255) NULL,
     company_description   TEXT NULL,
     logo_path             VARCHAR(255) NULL,
+    valid_id_path         VARCHAR(255) NULL,
+    company_photo_path    VARCHAR(255) NULL,
     approval_status       ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
     rejection_reason      VARCHAR(500) NULL,
     reviewed_by           INT UNSIGNED NULL,
@@ -87,6 +89,8 @@ CREATE TABLE jobs (
     slug              VARCHAR(180) NOT NULL,
     description       TEXT NOT NULL,
     requirements      TEXT NULL,
+    employment_process TEXT NULL,
+    scheduling_process TEXT NULL,
     location          VARCHAR(150) NULL,
     employment_type   ENUM('full_time','part_time','contract','internship','remote') NOT NULL DEFAULT 'full_time',
     salary_min        INT UNSIGNED NULL,
@@ -94,6 +98,11 @@ CREATE TABLE jobs (
     salary_currency   VARCHAR(10) NOT NULL DEFAULT 'PHP',
     category          VARCHAR(100) NULL,
     status            ENUM('open','closed','draft') NOT NULL DEFAULT 'draft',
+    approval_status   ENUM('not_required','pending','approved','rejected') NOT NULL DEFAULT 'not_required',
+    approval_requested_at DATETIME NULL,
+    rejection_reason  VARCHAR(500) NULL,
+    reviewed_by       INT UNSIGNED NULL,
+    reviewed_at       DATETIME NULL,
     posted_at         DATETIME NULL,
     closed_at         DATETIME NULL,
     created_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -101,8 +110,10 @@ CREATE TABLE jobs (
     UNIQUE KEY uq_jobs_slug (slug),
     KEY idx_jobs_employer (employer_id),
     KEY idx_jobs_status_location (status, location),
+    KEY idx_jobs_approval_status (approval_status),
     FULLTEXT KEY ft_jobs_title_description (title, description),
-    CONSTRAINT fk_jobs_employer FOREIGN KEY (employer_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_jobs_employer FOREIGN KEY (employer_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_jobs_reviewer FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -172,6 +183,22 @@ CREATE TABLE password_resets (
     KEY idx_password_resets_user (user_id),
     KEY idx_password_resets_token_hash (token_hash),
     CONSTRAINT fk_password_resets_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- password_reset_requests (admin-approval gate in front of password_resets)
+-- ---------------------------------------------------------------------
+CREATE TABLE password_reset_requests (
+    id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id         INT UNSIGNED NOT NULL,
+    status          ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+    reviewed_by     INT UNSIGNED NULL,
+    reviewed_at     DATETIME NULL,
+    created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_password_reset_requests_user (user_id),
+    KEY idx_password_reset_requests_status (status),
+    CONSTRAINT fk_password_reset_requests_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_password_reset_requests_reviewer FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------

@@ -6,6 +6,7 @@ use IMatchBetter\Auth\Auth;
 use IMatchBetter\Auth\Csrf;
 use IMatchBetter\Auth\Guard;
 use IMatchBetter\Models\Job;
+use IMatchBetter\Models\Notification;
 use IMatchBetter\Models\Skill;
 
 Guard::requireApproved();
@@ -27,10 +28,15 @@ $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verifyRequestOrFail();
 
+    $wasAlreadyApproved = $job['approval_status'] === 'approved';
+    $wantsOpen = ($_POST['status'] ?? '') === 'open';
+
     $job = array_merge($job, [
         'title' => trim($_POST['title'] ?? ''),
         'description' => trim($_POST['description'] ?? ''),
         'requirements' => trim($_POST['requirements'] ?? ''),
+        'employment_process' => trim($_POST['employment_process'] ?? ''),
+        'scheduling_process' => trim($_POST['scheduling_process'] ?? ''),
         'location' => trim($_POST['location'] ?? ''),
         'employment_type' => $_POST['employment_type'] ?? 'full_time',
         'salary_min' => $_POST['salary_min'] ?? '',
@@ -53,7 +59,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         Job::update($id, $job);
         Skill::syncJobSkills($id, Skill::parseList($job['required_skills']), Skill::parseList($job['preferred_skills']));
-        flash('success', 'Job posting updated.');
+
+        if ($wantsOpen && !$wasAlreadyApproved) {
+            foreach (Notification::adminUserIds() as $adminId) {
+                Notification::create((int) $adminId, 'job_submitted', "New job posting \"{$job['title']}\" needs approval.", $id, 'job');
+            }
+            flash('success', 'Job submitted for admin approval. It will appear publicly once approved.');
+        } else {
+            flash('success', 'Job posting updated.');
+        }
+
         redirect('/employer/jobs/index.php');
     }
 }
@@ -69,6 +84,11 @@ require __DIR__ . '/../../includes/header.php';
         <h1>Edit Job</h1>
         <?php if (!empty($errors)): ?>
             <div class="flash flash-error"><?= h(implode(' ', $errors)) ?></div>
+        <?php endif; ?>
+        <?php if ($job['approval_status'] === 'pending'): ?>
+            <div class="flash flash-info">This job is awaiting admin approval and isn't visible to applicants yet.</div>
+        <?php elseif ($job['approval_status'] === 'rejected'): ?>
+            <div class="flash flash-error">This job wasn't approved<?= !empty($job['rejection_reason']) ? ': ' . h($job['rejection_reason']) : '.' ?> Set status to "Publish" again to resubmit for review.</div>
         <?php endif; ?>
         <form method="post" action="<?= h(base_url('employer/jobs/edit.php?id=' . $id)) ?>" class="card" style="max-width:720px;">
             <?= Csrf::field() ?>

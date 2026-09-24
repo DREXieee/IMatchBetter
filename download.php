@@ -6,6 +6,7 @@ use IMatchBetter\Auth\Auth;
 use IMatchBetter\Auth\Guard;
 use IMatchBetter\Config\Database;
 use IMatchBetter\Models\Certificate;
+use IMatchBetter\Models\EmployerProfile;
 use IMatchBetter\Models\Resume;
 
 if (isset($_GET['certificate_id'])) {
@@ -101,6 +102,54 @@ if (isset($_GET['resume_id'])) {
 
     header('Content-Type: ' . $resume['mime_type']);
     header('Content-Disposition: attachment; filename="' . basename($resume['original_filename']) . '"');
+    header('Content-Length: ' . filesize($fullPath));
+    readfile($fullPath);
+    exit;
+}
+
+if (isset($_GET['employer_document'])) {
+    Guard::requireLogin();
+
+    $docType = $_GET['employer_document'];
+
+    if (!in_array($docType, ['valid_id', 'company_photo'], true)) {
+        http_response_code(400);
+        exit('Invalid document type.');
+    }
+
+    $profile = EmployerProfile::find((int) ($_GET['employer_profile_id'] ?? 0));
+
+    if (!$profile) {
+        http_response_code(404);
+        exit('Document not found.');
+    }
+
+    $authorized = Auth::role() === 'admin' || (int) $profile['user_id'] === (int) Auth::id();
+
+    if (!$authorized) {
+        http_response_code(403);
+        exit('You are not authorized to view this file.');
+    }
+
+    $column = $docType === 'valid_id' ? 'valid_id_path' : 'company_photo_path';
+    $filePath = $profile[$column] ?? null;
+
+    if (!$filePath) {
+        http_response_code(404);
+        exit('Document not found.');
+    }
+
+    $fullPath = BASE_PATH . '/' . $filePath;
+
+    if (!is_file($fullPath)) {
+        http_response_code(404);
+        exit('File no longer exists.');
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    header('Content-Type: ' . finfo_file($finfo, $fullPath));
+    finfo_close($finfo);
+    header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
     header('Content-Length: ' . filesize($fullPath));
     readfile($fullPath);
     exit;

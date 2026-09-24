@@ -3,11 +3,12 @@
 /**
  * Employer account creation. Expects $_POST: full_name, email, password,
  * confirm_password, company_name, company_website (optional),
- * company_description (optional). Populates $errors (array) on failure; on
- * success creates the user + employer profile, notifies admins, sends the
- * verification email, logs the user in, and redirects to the pending-approval
- * screen — the caller must have already verified the request is a POST for
- * this role.
+ * company_description (optional); and $_FILES: valid_id, company_photo
+ * (both required, for admin verification). Populates $errors (array) on
+ * failure; on success creates the user + employer profile, notifies admins,
+ * sends the verification email, logs the user in, and redirects to the
+ * pending-approval screen — the caller must have already verified the
+ * request is a POST for this role.
  *
  * Included, not required standalone — expects Csrf::verifyRequestOrFail()
  * to have already run in the including file.
@@ -19,6 +20,7 @@ use IMatchBetter\Models\EmailVerification;
 use IMatchBetter\Models\EmployerProfile;
 use IMatchBetter\Models\Notification;
 use IMatchBetter\Models\User;
+use IMatchBetter\Services\FileUploadService;
 use IMatchBetter\Services\Mailer;
 
 $fullName = trim($_POST['full_name'] ?? '');
@@ -46,9 +48,32 @@ if ($companyName === '') {
     $errors['company_name'] = 'Company name is required.';
 }
 
+if (empty($_FILES['valid_id']) || ($_FILES['valid_id']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+    $errors['valid_id'] = 'Please upload a valid ID or company registration document.';
+} else {
+    try {
+        FileUploadService::validateValidId($_FILES['valid_id']);
+    } catch (\RuntimeException $e) {
+        $errors['valid_id'] = $e->getMessage();
+    }
+}
+
+if (empty($_FILES['company_photo']) || ($_FILES['company_photo']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+    $errors['company_photo'] = 'Please upload a photo of your company environment.';
+} else {
+    try {
+        FileUploadService::validateCompanyPhoto($_FILES['company_photo']);
+    } catch (\RuntimeException $e) {
+        $errors['company_photo'] = $e->getMessage();
+    }
+}
+
 if (empty($errors)) {
+    $validId = FileUploadService::storeValidId($_FILES['valid_id']);
+    $companyPhoto = FileUploadService::storeCompanyPhoto($_FILES['company_photo']);
+
     $userId = User::create($email, $password, 'employer', $fullName);
-    EmployerProfile::create($userId, $companyName, $companyWebsite ?: null, $companyDescription ?: null);
+    EmployerProfile::create($userId, $companyName, $companyWebsite ?: null, $companyDescription ?: null, $validId['file_path'], $companyPhoto['file_path']);
 
     foreach (Notification::adminUserIds() as $adminId) {
         Notification::create(

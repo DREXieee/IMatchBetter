@@ -36,6 +36,22 @@ class FileUploadService
     ];
     private const CERTIFICATE_MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
+    private const VALID_ID_MIMES = [
+        'application/pdf' => 'pdf',
+        'application/msword' => 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+        'image/png' => 'png',
+        'image/jpeg' => 'jpg',
+    ];
+    private const VALID_ID_MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
+    private const COMPANY_PHOTO_MIMES = [
+        'image/png' => 'png',
+        'image/jpeg' => 'jpg',
+        'image/webp' => 'webp',
+    ];
+    private const COMPANY_PHOTO_MAX_SIZE = 2 * 1024 * 1024; // 2MB
+
     /**
      * @return array{original_filename:string, stored_filename:string, file_path:string, mime_type:string, file_size:int}
      */
@@ -59,6 +75,16 @@ class FileUploadService
         return self::store($file, 'certificates', self::CERTIFICATE_MIMES, self::CERTIFICATE_MAX_SIZE);
     }
 
+    public static function storeValidId(array $file): array
+    {
+        return self::store($file, 'employer-ids', self::VALID_ID_MIMES, self::VALID_ID_MAX_SIZE);
+    }
+
+    public static function storeCompanyPhoto(array $file): array
+    {
+        return self::store($file, 'company-photos', self::COMPANY_PHOTO_MIMES, self::COMPANY_PHOTO_MAX_SIZE);
+    }
+
     /**
      * Checks type/size only, without touching disk — lets a caller validate several
      * files up front and only persist any of them once all have passed.
@@ -76,6 +102,16 @@ class FileUploadService
     public static function validateCertificate(array $file): void
     {
         self::validate($file, self::CERTIFICATE_MIMES, self::CERTIFICATE_MAX_SIZE);
+    }
+
+    public static function validateValidId(array $file): void
+    {
+        self::validate($file, self::VALID_ID_MIMES, self::VALID_ID_MAX_SIZE);
+    }
+
+    public static function validateCompanyPhoto(array $file): void
+    {
+        self::validate($file, self::COMPANY_PHOTO_MIMES, self::COMPANY_PHOTO_MAX_SIZE);
     }
 
     private static function validate(array $file, array $allowedMimes, int $maxSize): string

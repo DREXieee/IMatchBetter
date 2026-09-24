@@ -3,6 +3,7 @@
 require __DIR__ . '/../includes/bootstrap.php';
 
 use IMatchBetter\Auth\Auth;
+use IMatchBetter\Auth\Csrf;
 use IMatchBetter\Auth\Guard;
 use IMatchBetter\Models\EmployerProfile;
 
@@ -26,8 +27,12 @@ require __DIR__ . '/../includes/header.php';
             <?php if (!empty($profile['rejection_reason'])): ?>
                 <p><strong>Reason:</strong> <?= h($profile['rejection_reason']) ?></p>
             <?php endif; ?>
-            <p>Update your company profile and an admin may reconsider.</p>
+            <p>Update your company profile and resubmit for review — there's no limit on resubmissions.</p>
             <a href="<?= h(base_url('employer/company-profile.php')) ?>" class="btn btn-primary">Edit company profile</a>
+            <form method="post" action="<?= h(base_url('employer/resubmit.php')) ?>" style="display:inline-block; margin-left:0.5rem;">
+                <?= Csrf::field() ?>
+                <button type="submit" class="btn btn-outline">Resubmit for Approval</button>
+            </form>
         <?php else: ?>
             <h1>Your account is pending approval</h1>
             <p>Thanks for registering <strong><?= h($profile['company_name'] ?? '') ?></strong> with IMatchBetter. An admin will review your request shortly — you'll be able to post jobs as soon as it's approved.</p>
