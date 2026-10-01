@@ -35,7 +35,6 @@ $extraStylesheets = ['css/dashboard.css'];
 require __DIR__ . '/../includes/header.php';
 ?>
 <div class="dashboard-shell">
-    <?php require __DIR__ . '/../includes/partials/sidebar-nav.php'; ?>
     <main class="dashboard-main">
         <div class="card" style="padding:0; overflow:hidden; margin-bottom:1.5rem;">
             <div style="background:var(--color-primary); height:90px;"></div>

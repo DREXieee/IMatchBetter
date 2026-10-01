@@ -64,7 +64,6 @@ $extraStylesheets = ['css/dashboard.css'];
 require __DIR__ . '/../../includes/header.php';
 ?>
 <div class="dashboard-shell">
-    <?php require __DIR__ . '/../../includes/partials/sidebar-nav.php'; ?>
     <main class="dashboard-main">
         <h1>Edit Job</h1>
         <?php if (!empty($errors)): ?>

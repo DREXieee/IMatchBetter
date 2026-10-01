@@ -35,7 +35,6 @@ $extraStylesheets = ['css/dashboard.css'];
 require __DIR__ . '/../includes/header.php';
 ?>
 <div class="dashboard-shell">
-    <?php require __DIR__ . '/../includes/partials/sidebar-nav.php'; ?>
     <main class="dashboard-main">
         <h1>Graduate Talent Database</h1>
         <p>Applicant profiles with education info filled in. Hide a profile to remove it from employer searches.</p>

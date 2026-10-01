@@ -19,7 +19,6 @@ $extraStylesheets = ['css/dashboard.css'];
 require __DIR__ . '/../../includes/header.php';
 ?>
 <div class="dashboard-shell">
-    <?php require __DIR__ . '/../../includes/partials/sidebar-nav.php'; ?>
     <main class="dashboard-main">
         <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
             <div>

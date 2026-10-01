@@ -16,7 +16,6 @@ $extraStylesheets = ['css/dashboard.css'];
 require __DIR__ . '/../../includes/header.php';
 ?>
 <div class="dashboard-shell">
-    <?php require __DIR__ . '/../../includes/partials/sidebar-nav.php'; ?>
     <main class="dashboard-main">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
             <h1 style="margin:0;">My Complaints</h1>

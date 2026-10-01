@@ -1,8 +1,6 @@
 <?php
 /** @var string $role */
-$current = ltrim($_SERVER['SCRIPT_NAME'], '/');
-
-$links = match ($role) {
+$dashboardLinks = match ($role) {
     'applicant' => [
         'dashboard.php' => 'Dashboard',
         'profile.php' => 'My Profile & Resume',
@@ -43,9 +41,3 @@ $links = match ($role) {
     ],
     default => [],
 };
-?>
-<aside class="dashboard-sidebar">
-    <?php foreach ($links as $href => $label): ?>
-        <a href="<?= h(base_url($role . '/' . $href)) ?>" class="<?= str_ends_with($current, $role . '/' . $href) ? 'active' : '' ?>"><?= h($label) ?></a>
-    <?php endforeach; ?>
-</aside>

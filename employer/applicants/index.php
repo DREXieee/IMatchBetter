@@ -33,7 +33,6 @@ $extraStylesheets = ['css/dashboard.css'];
 require __DIR__ . '/../../includes/header.php';
 ?>
 <div class="dashboard-shell">
-    <?php require __DIR__ . '/../../includes/partials/sidebar-nav.php'; ?>
     <main class="dashboard-main">
         <h1>Applicants for <?= h($job['title']) ?></h1>
         <p><a href="<?= h(base_url('employer/jobs/index.php')) ?>">&larr; Back to my jobs</a></p>
