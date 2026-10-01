@@ -61,6 +61,16 @@ require __DIR__ . '/includes/header.php';
             <p style="white-space:pre-line;"><?= h($job['requirements']) ?></p>
         <?php endif; ?>
 
+        <?php if (!empty($job['employment_process'])): ?>
+            <h3>Employment Process</h3>
+            <p style="white-space:pre-line;"><?= h($job['employment_process']) ?></p>
+        <?php endif; ?>
+
+        <?php if (!empty($job['scheduling_process'])): ?>
+            <h3>Scheduling Process</h3>
+            <p style="white-space:pre-line;"><?= h($job['scheduling_process']) ?></p>
+        <?php endif; ?>
+
         <?php if (!empty($jobSkills['required']) || !empty($jobSkills['preferred'])): ?>
             <h3>Skills</h3>
             <div class="job-card-meta" style="margin-bottom:1rem;">

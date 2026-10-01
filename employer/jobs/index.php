@@ -39,9 +39,20 @@ require __DIR__ . '/../../includes/header.php';
                     <tbody>
                     <?php foreach ($jobs as $job): ?>
                         <?php $counts = $applicantCounts[$job['id']] ?? ['total' => 0]; ?>
+                        <?php
+                        $badgeClass = $job['status'];
+                        $statusLabel = $job['status'];
+                        if ($job['approval_status'] === 'pending') {
+                            $badgeClass = 'pending';
+                            $statusLabel = 'pending approval';
+                        } elseif ($job['approval_status'] === 'rejected') {
+                            $badgeClass = 'rejected';
+                            $statusLabel = 'rejected';
+                        }
+                        ?>
                         <tr>
                             <td><?= h($job['title']) ?></td>
-                            <td><span class="badge badge-<?= h($job['status']) ?>"><?= h($job['status']) ?></span></td>
+                            <td><span class="badge badge-<?= h($badgeClass) ?>"><?= h($statusLabel) ?></span></td>
                             <td><?= $job['posted_at'] ? h(date('M j, Y', strtotime($job['posted_at']))) : '—' ?></td>
                             <td>
                                 <a href="<?= h(base_url('employer/applicants/index.php?job_id=' . $job['id'])) ?>"><?= $counts['total'] ?> total</a>

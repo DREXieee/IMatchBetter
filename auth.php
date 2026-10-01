@@ -122,7 +122,7 @@ require __DIR__ . '/includes/header.php';
             </div>
 
             <div class="auth-tab-panel" data-auth-panel="signup">
-                <form method="post" action="<?= h(base_url('auth.php')) ?>" novalidate data-step-wizard data-start-step="<?= (int) $signupStartStep ?>">
+                <form method="post" action="<?= h(base_url('auth.php')) ?>" enctype="multipart/form-data" novalidate data-step-wizard data-start-step="<?= (int) $signupStartStep ?>">
                     <?= Csrf::field() ?>
                     <input type="hidden" name="form" value="signup">
 
@@ -203,6 +203,17 @@ require __DIR__ . '/includes/header.php';
                                 <label class="form-label" for="company_description">Short company description (optional)</label>
                                 <textarea class="form-control" id="company_description" name="company_description" rows="3"><?= h($companyDescription) ?></textarea>
                             </div>
+                            <div class="form-group">
+                                <label class="form-label" for="valid_id">Valid government ID or company registration document</label>
+                                <input class="form-control" type="file" id="valid_id" name="valid_id" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
+                                <p class="form-hint">Used by our admin team to verify your company before approval.</p>
+                                <?php if (!empty($errors['valid_id'])): ?><div class="form-error"><?= h($errors['valid_id']) ?></div><?php endif; ?>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="company_photo">Photo of your company office/workspace</label>
+                                <input class="form-control" type="file" id="company_photo" name="company_photo" accept=".png,.jpg,.jpeg,.webp">
+                                <?php if (!empty($errors['company_photo'])): ?><div class="form-error"><?= h($errors['company_photo']) ?></div><?php endif; ?>
+                            </div>
                         </div>
 
                         <div class="step-actions">
@@ -220,12 +231,16 @@ require __DIR__ . '/includes/header.php';
     var typeSelect = document.getElementById('account_type');
     var employerFields = document.querySelector('[data-employer-fields]');
     var companyNameInput = document.getElementById('company_name');
+    var validIdInput = document.getElementById('valid_id');
+    var companyPhotoInput = document.getElementById('company_photo');
     if (!typeSelect || !employerFields) return;
 
     function sync() {
         var isEmployer = typeSelect.value === 'employer';
         employerFields.hidden = !isEmployer;
         if (companyNameInput) companyNameInput.required = isEmployer;
+        if (validIdInput) validIdInput.required = isEmployer;
+        if (companyPhotoInput) companyPhotoInput.required = isEmployer;
     }
     typeSelect.addEventListener('change', sync);
     sync();

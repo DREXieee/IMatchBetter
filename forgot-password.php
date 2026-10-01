@@ -4,7 +4,9 @@ require __DIR__ . '/includes/bootstrap.php';
 
 use IMatchBetter\Auth\Csrf;
 use IMatchBetter\Auth\Guard;
+use IMatchBetter\Models\Notification;
 use IMatchBetter\Models\PasswordReset;
+use IMatchBetter\Models\PasswordResetRequest;
 use IMatchBetter\Models\User;
 use IMatchBetter\Services\Mailer;
 
@@ -19,8 +21,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = User::findByEmail($email);
 
     // Cooldown + generic response either way, so this endpoint can't be used to enumerate
-    // accounts or be hammered to spam a target's inbox with reset emails.
-    if ($user && !PasswordReset::hasRecentRequest((int) $user['id'])) {
+    // accounts or be hammered to spam a target's inbox (or admins) with duplicate requests.
+    if ($user && $user['role'] === 'employer') {
+        // Employers go through admin approval (extra security gate) — no token is generated
+        // and no email is sent here; an admin must approve first (see
+        // admin/password-resets/approve.php), which is where PasswordReset::create() runs.
+        if (!PasswordResetRequest::hasRecentRequest((int) $user['id'])) {
+            $requestId = PasswordResetRequest::create((int) $user['id']);
+
+            foreach (Notification::adminUserIds() as $adminId) {
+                Notification::create(
+                    (int) $adminId,
+                    'password_reset_requested',
+                    "{$user['full_name']} ({$user['email']}) requested a password reset.",
+                    $requestId,
+                    'password_reset_request'
+                );
+            }
+        }
+    } elseif ($user && !PasswordReset::hasRecentRequest((int) $user['id'])) {
+        // Applicants and admins keep the normal instant reset — no approval gate.
         $token = PasswordReset::create((int) $user['id']);
         $resetUrl = base_url('reset-password.php?token=' . $token);
 

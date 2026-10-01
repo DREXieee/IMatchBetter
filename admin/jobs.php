@@ -65,13 +65,14 @@ require __DIR__ . '/../includes/header.php';
         <?php else: ?>
             <div class="table-wrap">
                 <table class="data-table">
-                    <thead><tr><th>Title</th><th>Company</th><th>Status</th><th>Posted</th><th></th></tr></thead>
+                    <thead><tr><th>Title</th><th>Company</th><th>Status</th><th>Approval</th><th>Posted</th><th></th></tr></thead>
                     <tbody>
                     <?php foreach ($jobs as $job): ?>
                         <tr>
                             <td><a href="<?= h(base_url('job-view.php?slug=' . urlencode($job['slug']))) ?>" target="_blank" rel="noopener"><?= h($job['title']) ?></a></td>
                             <td><?= h($job['company_name']) ?></td>
                             <td><span class="badge badge-<?= h($job['status']) ?>"><?= h($job['status']) ?></span></td>
+                            <td><span class="badge badge-<?= h($job['approval_status']) ?>"><?= h($job['approval_status']) ?></span></td>
                             <td><?= $job['posted_at'] ? h(date('M j, Y', strtotime($job['posted_at']))) : '—' ?></td>
                             <td>
                                 <form method="post" onsubmit="return confirm('Remove this job posting permanently?');">

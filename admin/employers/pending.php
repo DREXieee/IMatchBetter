@@ -37,6 +37,12 @@ require __DIR__ . '/../../includes/header.php';
                             <?php if (!empty($ep['company_description'])): ?>
                                 <p><?= h($ep['company_description']) ?></p>
                             <?php endif; ?>
+                            <?php if (!empty($ep['valid_id_path'])): ?>
+                                <p style="margin-bottom:0.25rem;"><a href="<?= h(base_url('download.php?employer_document=valid_id&employer_profile_id=' . $ep['id'])) ?>" target="_blank" rel="noopener">View valid ID / registration document</a></p>
+                            <?php endif; ?>
+                            <?php if (!empty($ep['company_photo_path'])): ?>
+                                <p style="margin-bottom:0.25rem;"><a href="<?= h(base_url('download.php?employer_document=company_photo&employer_profile_id=' . $ep['id'])) ?>" target="_blank" rel="noopener">View company photo</a></p>
+                            <?php endif; ?>
                             <p class="form-hint">Requested <?= h(date('M j, Y', strtotime($ep['created_at']))) ?></p>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:0.5rem; min-width:160px;">
@@ -49,7 +55,7 @@ require __DIR__ . '/../../includes/header.php';
                                 <?= Csrf::field() ?>
                                 <input type="hidden" name="id" value="<?= (int) $ep['id'] ?>">
                                 <input type="hidden" name="reason" value="">
-                                <button type="submit" class="btn btn-outline btn-block">Reject</button>
+                                <button type="submit" class="btn btn-outline btn-block">Request Changes</button>
                             </form>
                         </div>
                     </div>
@@ -60,7 +66,7 @@ require __DIR__ . '/../../includes/header.php';
 </div>
 <script>
 function collectReason(form) {
-    var reason = prompt('Reason for rejection (shown to the employer):');
+    var reason = prompt('What needs to change? (shown to the employer — they can update their profile and resubmit):');
     if (reason === null || reason.trim() === '') {
         return false;
     }

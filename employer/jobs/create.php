@@ -6,13 +6,13 @@ use IMatchBetter\Auth\Auth;
 use IMatchBetter\Auth\Csrf;
 use IMatchBetter\Auth\Guard;
 use IMatchBetter\Models\Job;
-use IMatchBetter\Models\JobMatchQueue;
+use IMatchBetter\Models\Notification;
 use IMatchBetter\Models\Skill;
 
 Guard::requireApproved();
 
 $job = [
-    'title' => '', 'description' => '', 'requirements' => '', 'location' => '',
+    'title' => '', 'description' => '', 'requirements' => '', 'employment_process' => '', 'scheduling_process' => '', 'location' => '',
     'employment_type' => 'full_time', 'salary_min' => '', 'salary_max' => '', 'category' => '', 'status' => 'draft',
     'offers_training' => false, 'career_growth_notes' => '', 'required_skills' => '', 'preferred_skills' => '',
 ];
@@ -25,6 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'title' => trim($_POST['title'] ?? ''),
         'description' => trim($_POST['description'] ?? ''),
         'requirements' => trim($_POST['requirements'] ?? ''),
+        'employment_process' => trim($_POST['employment_process'] ?? ''),
+        'scheduling_process' => trim($_POST['scheduling_process'] ?? ''),
         'location' => trim($_POST['location'] ?? ''),
         'employment_type' => $_POST['employment_type'] ?? 'full_time',
         'salary_min' => $_POST['salary_min'] ?? '',
@@ -45,18 +47,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
+        $wantsOpen = $job['status'] === 'open';
         $job['employer_id'] = Auth::id();
         $jobId = Job::create($job);
         Skill::syncJobSkills($jobId, Skill::parseList($job['required_skills']), Skill::parseList($job['preferred_skills']));
 
-        if ($job['status'] === 'open') {
-            // Scoring every applicant against this job happens off the request path — see
-            // scripts/process-job-match-queue.php — so publishing a job stays fast regardless
-            // of applicant pool size.
-            JobMatchQueue::enqueue($jobId);
+        if ($wantsOpen) {
+            // A brand-new job is never already approved — always notify admins to review it.
+            // Match-queue scoring is deferred until admin/jobs/approve.php, once it's truly public.
+            foreach (Notification::adminUserIds() as $adminId) {
+                Notification::create((int) $adminId, 'job_submitted', "New job posting \"{$job['title']}\" needs approval.", $jobId, 'job');
+            }
+            flash('success', 'Job submitted for admin approval. It will appear publicly once approved.');
+        } else {
+            flash('success', 'Job saved as a draft.');
         }
 
-        flash('success', 'Job posting created.');
         redirect('/employer/jobs/index.php');
     }
 }

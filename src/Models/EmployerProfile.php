@@ -16,12 +16,12 @@ class EmployerProfile
         return $profile ?: null;
     }
 
-    public static function create(int $userId, string $companyName, ?string $website, ?string $description): int
+    public static function create(int $userId, string $companyName, ?string $website, ?string $description, ?string $validIdPath = null, ?string $companyPhotoPath = null): int
     {
         $stmt = Database::connection()->prepare(
-            'INSERT INTO employer_profiles (user_id, company_name, company_website, company_description) VALUES (?, ?, ?, ?)'
+            'INSERT INTO employer_profiles (user_id, company_name, company_website, company_description, valid_id_path, company_photo_path) VALUES (?, ?, ?, ?, ?, ?)'
         );
-        $stmt->execute([$userId, $companyName, $website, $description]);
+        $stmt->execute([$userId, $companyName, $website, $description, $validIdPath, $companyPhotoPath]);
 
         return (int) Database::connection()->lastInsertId();
     }
@@ -66,6 +66,18 @@ class EmployerProfile
         $stmt->execute([$adminId, $reason, $employerProfileId]);
     }
 
+    /**
+     * Puts a rejected request back in the admin's pending queue. Unlimited resubmits are
+     * allowed — this is reachable any time approval_status is 'rejected'.
+     */
+    public static function resubmit(int $employerProfileId): void
+    {
+        $stmt = Database::connection()->prepare(
+            'UPDATE employer_profiles SET approval_status = "pending", rejection_reason = NULL, reviewed_by = NULL, reviewed_at = NULL WHERE id = ?'
+        );
+        $stmt->execute([$employerProfileId]);
+    }
+
     public static function find(int $id): ?array
     {
         $stmt = Database::connection()->prepare(
@@ -80,20 +92,26 @@ class EmployerProfile
         return $profile ?: null;
     }
 
-    public static function updateProfile(int $userId, string $companyName, ?string $website, ?string $description, ?string $logoPath = null): void
+    public static function updateProfile(int $userId, string $companyName, ?string $website, ?string $description, ?string $logoPath = null, ?string $validIdPath = null, ?string $companyPhotoPath = null): void
     {
-        $pdo = Database::connection();
+        $fields = ['company_name = ?', 'company_website = ?', 'company_description = ?'];
+        $params = [$companyName, $website, $description];
 
         if ($logoPath !== null) {
-            $stmt = $pdo->prepare(
-                'UPDATE employer_profiles SET company_name = ?, company_website = ?, company_description = ?, logo_path = ? WHERE user_id = ?'
-            );
-            $stmt->execute([$companyName, $website, $description, $logoPath, $userId]);
-        } else {
-            $stmt = $pdo->prepare(
-                'UPDATE employer_profiles SET company_name = ?, company_website = ?, company_description = ? WHERE user_id = ?'
-            );
-            $stmt->execute([$companyName, $website, $description, $userId]);
+            $fields[] = 'logo_path = ?';
+            $params[] = $logoPath;
         }
+        if ($validIdPath !== null) {
+            $fields[] = 'valid_id_path = ?';
+            $params[] = $validIdPath;
+        }
+        if ($companyPhotoPath !== null) {
+            $fields[] = 'company_photo_path = ?';
+            $params[] = $companyPhotoPath;
+        }
+        $params[] = $userId;
+
+        $stmt = Database::connection()->prepare('UPDATE employer_profiles SET ' . implode(', ', $fields) . ' WHERE user_id = ?');
+        $stmt->execute($params);
     }
 }

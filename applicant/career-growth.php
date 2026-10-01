@@ -14,17 +14,17 @@ $results = JobSearchService::search(['careerGrowth' => true, 'page' => $page]);
 $savedJobIds = SavedJob::savedJobIdSet((int) Auth::id());
 
 $role = 'applicant';
-$pageTitle = 'Career Growth Insights — IMatchBetter';
+$pageTitle = 'Job Post — IMatchBetter';
 $extraStylesheets = ['css/dashboard.css'];
 require __DIR__ . '/../includes/header.php';
 ?>
 <div class="dashboard-shell">
     <main class="dashboard-main">
-        <h1>Career Growth Insights</h1>
+        <h1>Job Post</h1>
         <p>Open roles that highlight training, promotions, and long-term career development.</p>
 
         <?php if (empty($results['jobs'])): ?>
-            <div class="card empty-state">No career-growth-flagged jobs right now. Check back soon.</div>
+            <div class="card empty-state">No matching jobs right now. Check back soon.</div>
         <?php else: ?>
             <div class="grid grid-2">
                 <?php foreach ($results['jobs'] as $job): ?>

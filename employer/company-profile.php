@@ -22,6 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $companyWebsite = trim($_POST['company_website'] ?? '');
     $companyDescription = trim($_POST['company_description'] ?? '');
     $logoPath = null;
+    $validIdPath = null;
+    $companyPhotoPath = null;
 
     if ($companyName === '') {
         $errors['company_name'] = 'Company name is required.';
@@ -36,8 +38,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if (!empty($_FILES['valid_id']) && ($_FILES['valid_id']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        try {
+            $stored = FileUploadService::storeValidId($_FILES['valid_id']);
+            $validIdPath = $stored['file_path'];
+        } catch (\RuntimeException $e) {
+            $errors['valid_id'] = $e->getMessage();
+        }
+    }
+
+    if (!empty($_FILES['company_photo']) && ($_FILES['company_photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        try {
+            $stored = FileUploadService::storeCompanyPhoto($_FILES['company_photo']);
+            $companyPhotoPath = $stored['file_path'];
+        } catch (\RuntimeException $e) {
+            $errors['company_photo'] = $e->getMessage();
+        }
+    }
+
     if (empty($errors)) {
-        EmployerProfile::updateProfile($userId, $companyName, $companyWebsite ?: null, $companyDescription ?: null, $logoPath);
+        EmployerProfile::updateProfile($userId, $companyName, $companyWebsite ?: null, $companyDescription ?: null, $logoPath, $validIdPath, $companyPhotoPath);
         flash('success', 'Company profile updated.');
         redirect('/employer/company-profile.php');
     }
@@ -61,7 +81,7 @@ require __DIR__ . '/../includes/header.php';
     <main class="dashboard-main">
         <h1>Company Profile</h1>
 
-        <form method="post" action="<?= h(base_url('employer/company-profile.php')) ?>" enctype="multipart/form-data" class="card" style="max-width:640px;">
+        <form method="post" action="<?= h(base_url('employer/company-profile.php')) ?>" enctype="multipart/form-data" class="card" style="max-width:640px;" data-upload-loading>
             <?= Csrf::field() ?>
 
             <?php if (!empty($profile['logo_path'])): ?>
@@ -90,8 +110,35 @@ require __DIR__ . '/../includes/header.php';
                 <?php if (!empty($errors['logo'])): ?><div class="form-error"><?= h($errors['logo']) ?></div><?php endif; ?>
             </div>
 
+            <div class="form-group">
+                <label class="form-label" for="valid_id">Valid ID / company registration document (optional replacement)</label>
+                <input class="form-control" type="file" id="valid_id" name="valid_id" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
+                <?php if (!empty($profile['valid_id_path'])): ?>
+                    <p class="form-hint"><a href="<?= h(base_url('download.php?employer_document=valid_id&employer_profile_id=' . $profile['id'])) ?>" target="_blank" rel="noopener">View current document</a></p>
+                <?php endif; ?>
+                <?php if (!empty($errors['valid_id'])): ?><div class="form-error"><?= h($errors['valid_id']) ?></div><?php endif; ?>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="company_photo">Company photo (optional replacement)</label>
+                <input class="form-control" type="file" id="company_photo" name="company_photo" accept=".png,.jpg,.jpeg,.webp">
+                <?php if (!empty($profile['company_photo_path'])): ?>
+                    <p class="form-hint"><a href="<?= h(base_url('download.php?employer_document=company_photo&employer_profile_id=' . $profile['id'])) ?>" target="_blank" rel="noopener">View current photo</a></p>
+                <?php endif; ?>
+                <?php if (!empty($errors['company_photo'])): ?><div class="form-error"><?= h($errors['company_photo']) ?></div><?php endif; ?>
+            </div>
+
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
+
+        <?php if (($profile['approval_status'] ?? '') === 'rejected'): ?>
+            <form method="post" action="<?= h(base_url('employer/resubmit.php')) ?>" class="card" style="max-width:640px; margin-top:1.5rem;">
+                <?= Csrf::field() ?>
+                <p>Your request was not approved.<?php if (!empty($profile['rejection_reason'])): ?> <strong>Reason:</strong> <?= h($profile['rejection_reason']) ?><?php endif; ?></p>
+                <p>Update your profile above, then resubmit for review.</p>
+                <button type="submit" class="btn btn-primary">Resubmit for Approval</button>
+            </form>
+        <?php endif; ?>
 
         <div class="card" style="max-width:640px; margin-top:1.5rem;">
             <h3>Reviews from Applicants</h3>

@@ -28,7 +28,8 @@ if (!$profile) {
 }
 
 if ($reason === '') {
-    $reason = 'No reason provided.';
+    flash('error', 'Please provide a reason for the requested changes.');
+    redirect('/admin/employers/pending.php');
 }
 
 EmployerProfile::reject($id, (int) Auth::id(), $reason);
@@ -52,5 +53,5 @@ if ($emailSent) {
     Notification::markEmailSent($notificationId);
 }
 
-flash('info', $profile['company_name'] . ' has been rejected.');
+flash('info', $profile['company_name'] . ' was sent back for changes.');
 redirect('/admin/employers/pending.php');
