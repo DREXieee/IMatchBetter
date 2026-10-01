@@ -1,0 +1,54 @@
+/* ==========================================================================
+   Animated butterfly-flap logo — shared component.
+   Markup: .logo-flap-stage > svg.logo-flap (see
+   includes/partials/loading-screen.php and the page-transition overlay in
+   includes/header.php for the two current usages).
+   Base size/position only. Each placement scopes its own sizing on top of
+   this file (see ".loading-core .logo-flap-stage" in loading-screen.css) —
+   don't redeclare the animation or gradients per placement.
+   ========================================================================== */
+
+.logo-flap-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.logo-flap {
+    width: 140px;
+    height: auto;
+    overflow: visible;
+    filter: drop-shadow(0 10px 18px rgba(20, 40, 80, 0.18));
+}
+.wing-left, .wing-right {
+    transform-box: view-box;
+    transform-origin: 100px 100px;
+    animation: logo-flap 2.6s cubic-bezier(.45,.05,.35,1) infinite;
+}
+.logo-dots {
+    transform-box: view-box;
+    transform-origin: 100px 40px;
+    animation: logo-flap-bob 2.6s ease-in-out infinite;
+}
+@keyframes logo-flap {
+    0%   { transform: scaleX(1); }
+    8%   { transform: scaleX(1); }
+    18%  { transform: scaleX(0.16); }
+    27%  { transform: scaleX(1); }
+    36%  { transform: scaleX(0.16); }
+    46%  { transform: scaleX(1); }
+    100% { transform: scaleX(1); }
+}
+@keyframes logo-flap-bob {
+    0%   { transform: translateY(0); }
+    8%   { transform: translateY(0); }
+    18%  { transform: translateY(3px); }
+    27%  { transform: translateY(0); }
+    36%  { transform: translateY(3px); }
+    46%  { transform: translateY(0); }
+    100% { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .wing-left, .wing-right, .logo-dots {
+        animation: none;
+    }
+}

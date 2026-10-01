@@ -1,0 +1,53 @@
+/* ==========================================================================
+   Page-load overlay (animated butterfly logo) — see js/page-transition.js
+   and the #page-transition-overlay markup + inline show script in
+   includes/header.php. Separate element from #loading-screen (which is
+   upload-only). Shown on every page load, faded out shortly after — not
+   tied to link clicks/navigation (that caused a back/forward-cache bug,
+   see js/page-transition.js for details).
+   ========================================================================== */
+
+/* Overrides the inline #page-transition-overlay{display:none} fallback printed in
+   includes/header.php right before this stylesheet's <link> tag — same specificity
+   (ID selector), later in cascade order, so this wins once the stylesheet is loaded. */
+#page-transition-overlay {
+    display: flex;
+}
+
+.page-transition-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg, #ffffff);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease;
+}
+
+.page-transition-overlay.is-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* logo-flap.css's flap/bob keyframes hold static for the first 8% (~208ms) of
+   their 2.6s loop and don't reach the first fold until 18% (~468ms) — close to
+   this overlay's own ~500ms minimum display time (js/page-transition.js).
+   Starting the loop already 400ms in (mid-fold) means it's reliably showing
+   real motion for most of that window instead of just the idle rest pose.
+   Scoped to this overlay only — the loading-screen's own copy of the logo
+   stays on screen for seconds during an upload, so it never had this problem
+   and shouldn't have its timing shifted. */
+.page-transition-overlay .wing-left,
+.page-transition-overlay .wing-right,
+.page-transition-overlay .logo-dots {
+    animation-delay: -0.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-transition-overlay {
+        transition: none;
+    }
+}
