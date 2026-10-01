@@ -33,9 +33,12 @@ require __DIR__ . '/../includes/header.php';
 ?>
 <div class="dashboard-shell">
     <main class="dashboard-main">
-        <div class="dashboard-header">
-            <h1>Reports &amp; Insights</h1>
-            <p>Platform-wide activity at a glance.</p>
+        <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <h1>Reports &amp; Insights</h1>
+                <p>Platform-wide activity at a glance.</p>
+            </div>
+            <a href="<?= h(base_url('admin/reports/export.php')) ?>" class="btn btn-primary">Download PDF</a>
         </div>
 
         <div class="stat-row">

@@ -14,13 +14,13 @@ $results = JobSearchService::search(['careerGrowth' => true, 'page' => $page]);
 $savedJobIds = SavedJob::savedJobIdSet((int) Auth::id());
 
 $role = 'applicant';
-$pageTitle = 'Job Post — IMatchBetter';
+$pageTitle = 'Job Postings — IMatchBetter';
 $extraStylesheets = ['css/dashboard.css'];
 require __DIR__ . '/../includes/header.php';
 ?>
 <div class="dashboard-shell">
     <main class="dashboard-main">
-        <h1>Job Post</h1>
+        <h1>Job Postings</h1>
         <p>Open roles that highlight training, promotions, and long-term career development.</p>
 
         <?php if (empty($results['jobs'])): ?>
